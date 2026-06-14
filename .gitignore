@@ -1,0 +1,25 @@
+# ── Secrets ─────────────────────────────────────────────
+.env
+*.key
+.mcp_publisher_token
+
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.venv-docling/
+
+# ── OS / editor ─────────────────────────────────────────
+.DS_Store
+*.swp
+
+# ── Corpus data & full reproductions (NOT published) ────
+# The benchmark runs on three source PDFs whose full content
+# is reproduced by the transcriptions, renders, and per-vendor
+# reconstructions below. These are intentionally excluded —
+# see the "Data is not included" section of README.md.
+Data/
+ground_truth/
+results/*
+!results/*.md

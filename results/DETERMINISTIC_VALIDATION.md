@@ -1,0 +1,73 @@
+# Deterministic validator — zero-LLM cross-check on the headline (2026-06-14)
+
+A reproducible, model-free triangulation of the LLM fair-total judge. It does **not** replace the judge; it corroborates the parts that are mechanically checkable on this born-digital corpus (printed numbers are an exact oracle) and flags where judge and oracle disagree. Scope and limits established in `POC_DETERMINISTIC_SCORING.md`.
+
+Reproduce: `python3 scripts/deterministic_validate.py && python3 scripts/deterministic_report.py`
+
+
+## 1. Tiering corroboration — TABLE pages (gated, no LLM)
+
+The **structure tax** = numeric_recall − binding_recall: numbers that are present but lost their row/series binding. `numeric_recall` saturates and cannot separate the text-dumper from the leaders; the structure tax does, and it tiers like the judge.
+
+| vendor | numeric_recall | binding_recall | **structure tax** | judge_struct |
+|---|---:|---:|---:|---:|
+| llamaparse | 99 | 98 | **1** | 86 |
+| gpt5_image ◆ | 98 | 96 | **2** | 86 |
+| gemini_flash | 99 | 95 | **4** | 88 |
+| landingai | 97 | 86 | **11** | 82 |
+| pymupdf | 98 | 79 | **19** | 72 |
+| tesseract | 80 | 54 | **26** | 51 |
+
+*Read the structure tax inversely against judge_struct: low tax ↔ high judge (structure preserved); high tax ↔ low judge (structure destroyed). This reproduces the LandingAI-above-PyMuPDF ordering and the PyMuPDF/Tesseract collapse that numeric_recall alone (all ~98 except Tesseract) is blind to.*
+
+
+### 1b. TEXT pages — diagnostic only (deterministic signal is confounded)
+
+Shown for honesty, **not** used for corroboration. On prose, binding_recall diverges from the judge in both directions: Tesseract's OCR mangles label tokens so same-line matching fails (binding ≪ judge), while PyMuPDF's reading-order errors are invisible to a per-line check (binding ≫ judge). Tables are the clean cut.
+
+| vendor | numeric_recall | binding_recall | judge_struct |
+|---|---:|---:|---:|
+| gemini_flash | 99 | 89 | 95 |
+| gpt5_image ◆ | 99 | 95 | 96 |
+| landingai | 97 | 86 | 93 |
+| llamaparse | 99 | 99 | 96 |
+| pymupdf | 96 | 90 | 79 |
+| tesseract | 79 | 34 | 80 |
+
+## 2. Numeric-fidelity floor — all number-bearing pages (oracle lower bound)
+
+Fraction of the GT's **printed numbers** each vendor reproduces anywhere, by exact normalized match. Exact match never over-credits, and formatting variants can only *miss*, so this is a conservative **lower bound** on numeric capture. Tesseract's OCR floor is the only clear separation here — binding (job 1) is what de-saturates the rest.
+
+| vendor | numeric floor (≥) |
+|---|---:|
+| gpt5_image ◆ | 98% |
+| gemini_flash | 97% |
+| llamaparse | 97% |
+| pymupdf | 96% |
+| landingai | 93% |
+| tesseract | 74% |
+
+## 3. Judge-disagreement worklist — vendor outliers, gated TABLE pages
+
+76 vendor-page(s) where one vendor's deterministic-vs-judge gap is an outlier (|gap − page median| ≥ 35) vs its peers on the same page — the bug signature, since a real measurement bug is vendor-specific while a metric blind spot (e.g. a flattened feature matrix) moves all vendors together and cancels in the page median. **anomaly > 0**: this vendor scores far higher deterministically than the judge credits, vs peers — judge may under-score it, its structure may be non-numeric, OR its bindings are actively WRONG in a way same-line matching can't see (e.g. a header/body column-count mismatch shifts every value one column — real catch: Alpha p87 LandingAI, bind 98 / judge 20). **anomaly < 0**: deterministic says this vendor is far worse than the judge does, vs peers (parser/harness may be dropping its content — this is how the vendor_md `##` split was caught). Full list: `results/_deterministic_disagreements.json`.
+
+| vendor | doc/page | bind | judge | gap | page-median | **anomaly** |
+|---|---|---:|---:|---:|---:|---:|
+| pymupdf | 20190308_Projet_Alpha_Rest p87 | 11 | 92 | -81 | +1 | **-82** |
+| landingai | 20190308_Projet_Alpha_Rest p87 | 98 | 20 | +78 | +1 | **+77** |
+| tesseract | 20190308_Projet_Alpha_Rest p87 | 7 | 82 | -75 | +1 | **-76** |
+| tesseract | IAR_FY25_EN p85 | 29 | 60 | -31 | +43 | **-74** |
+| landingai | 20190308_Projet_Alpha_Rest p135 | 17 | 25 | -8 | +61 | **-70** |
+| llamaparse | 20190308_Projet_Alpha_Rest p128 | 100 | 35 | +65 | -3 | **+68** |
+| pymupdf | IAR_FY25_EN p166 | 100 | 35 | +65 | +0 | **+65** |
+| landingai | SOTER - Company Presentati p67 | 11 | 85 | -74 | -9 | **-65** |
+| pymupdf | 20190308_Projet_Alpha_Rest p69 | 26 | 85 | -59 | +2 | **-61** |
+| tesseract | SOTER - Company Presentati p21 | 29 | 88 | -59 | +2 | **-61** |
+| landingai | 20190308_Projet_Alpha_Rest p132 | 3 | 65 | -62 | -3 | **-59** |
+| tesseract | 20190308_Projet_Alpha_Rest p31 | 18 | 65 | -47 | +11 | **-58** |
+| pymupdf | IAR_FY25_EN p163 | 35 | 92 | -58 | +0 | **-58** |
+| pymupdf | SOTER - Company Presentati p14 | 0 | 60 | -60 | -2 | **-58** |
+| pymupdf | IAR_FY25_EN p287 | 100 | 45 | +55 | -1 | **+56** |
+
+---
+*Generated by `scripts/deterministic_report.py` from `results/_deterministic_scores.json`. Limits: numeric-binding only — blind to charts (serialization/paraphrase), diagrams, and non-numeric tables, which remain the blind LLM judge's domain.*
