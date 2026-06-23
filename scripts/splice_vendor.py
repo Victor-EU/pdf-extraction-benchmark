@@ -17,20 +17,25 @@ Usage:
 """
 import os, sys, json, shutil
 
-# (canonical path, 9-vendor re-judge path) per judge family/rubric.
-FAMILIES = {
-    "gpt-5 structure":  ("results/_fair_total_judging.json",
-                         "results/_fair_total_judging_lp.json"),
-    "gemini structure": ("results/_fair_total_judging_gemini_v2.json",
-                         "results/_fair_total_judging_gemini_v2_lp.json"),
-    "gpt-5 content":    ("results/_fair_total_judging_content.json",
-                         "results/_fair_total_judging_content_lp.json"),
-    "gemini content":   ("results/_fair_total_judging_gemini_v2_content.json",
-                         "results/_fair_total_judging_gemini_v2_content_lp.json"),
+# Per-vendor re-judge suffix on the canonical JSON names. liteparse used `_lp`; default = `_<vendor>`.
+SUFFIX = {"liteparse": "_lp"}
+
+# canonical judge JSONs (the existing vendors that must stay stable live here).
+CANON = {
+    "gpt-5 structure":  "results/_fair_total_judging.json",
+    "gemini structure": "results/_fair_total_judging_gemini_v2.json",
+    "gpt-5 content":    "results/_fair_total_judging_content.json",
+    "gemini content":   "results/_fair_total_judging_gemini_v2_content.json",
 }
-# canonical 8 (the ones that must stay stable); the new vendor is the CLI arg.
+
+def families(vendor):
+    """(canonical path, N+1-vendor re-judge path) per judge family/rubric, suffix per vendor."""
+    suf = SUFFIX.get(vendor, f"_{vendor}")
+    return {name: (cp, cp.replace(".json", suf + ".json")) for name, cp in CANON.items()}
+
+# canonical vendors that must stay stable (now 9, incl. liteparse); the new vendor is the CLI arg.
 CANON_VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-                 "landingai", "llamaparse", "pymupdf", "tesseract"]
+                 "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse"]
 DRIFT_GATE = 1.5
 
 
@@ -89,7 +94,7 @@ def splice_into(vendor, canon_path, run9_path):
         src = run9.get(k, {}).get("scores", {}).get(vendor)
         if src is not None and "scores" in r:
             r["scores"][vendor] = src; n += 1
-    arch = "results/pre_liteparse_archive"
+    arch = f"results/pre_{vendor}_archive"
     os.makedirs(arch, exist_ok=True)
     shutil.copy(canon_path, os.path.join(arch, os.path.basename(canon_path)))
     json.dump(canon, open(canon_path, "w"), indent=2)
@@ -103,7 +108,7 @@ def main():
     do_splice = "--splice" in sys.argv
     all_ok = True
     present = {}
-    for name, (cp, rp) in FAMILIES.items():
+    for name, (cp, rp) in families(vendor).items():
         if not os.path.exists(rp):
             print(f"\n{name}: 9-vendor run {rp} not found — skipping"); continue
         canon, run9 = load(cp), load(rp)

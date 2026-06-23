@@ -16,6 +16,7 @@ Each vendor's full 599-page extraction was diffed, page by page, against a groun
 | Landing AI | **86%** | 89% | −3 | 11% |
 | Gemini 3.1 Flash-Lite | **86%** | 90% | −4 | 8% |
 | LlamaParse | **86%** | 90% | −4 | 10% |
+| Mistral OCR 4 | **80%** | 84% | −4 | 19% |
 | PyMuPDF | **68%** | 84% | −16 | 5% |
 | LiteParse | **62%** | 80% | −18 | 8% |
 | Tesseract | **52%** | 64% | −12 | 15% |
@@ -32,6 +33,7 @@ Each vendor's full 599-page extraction was diffed, page by page, against a groun
 | Landing AI | 95% | 86% | 78% | 90% | 82% | 88% |
 | Gemini 3.1 Flash-Lite | 94% | 85% | 78% | 89% | 85% | 68% |
 | LlamaParse | 96% | 85% | 76% | 92% | 77% | 42% |
+| Mistral OCR 4 | 96% | 85% | 62% | 87% | 61% | 86% |
 | PyMuPDF | 80% | 71% | 54% | 79% | 51% | 28% |
 | LiteParse | 85% | 60% | 44% | 71% | 50% | 54% |
 | Tesseract | 78% | 50% | 33% | 59% | 31% | 37% |

@@ -254,6 +254,32 @@ def collect_liteparse():
     return out
 
 
+def collect_mistral():
+    """Mistral OCR-4 (advanced config) raw per-page response -> vendor format. The page markdown
+    (tables inlined as HTML, image placeholders stripped) is the single ordered block (-> ordered_full,
+    like the LlamaParse page-md / LiteParse path); each annotated image becomes a figure {kind, content}
+    (parallel to collect_landingai's figure chunks) so OCR-4 is fairly credited as a figure reader.
+    Reduction lives in mistral_common.reduce_page, shared with the runner + input A/B so they cannot
+    diverge. Numbers in tables + figure descriptions join the numeric pool (finance values live there)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import mistral_common as M
+    raw = "ground_truth/mistral/raw"
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        cp = os.path.join(raw, f"{doc}__p{page:04d}.json")
+        if not os.path.exists(cp):
+            print(f"  [skip] {doc} p{page}: no raw at {cp}", file=sys.stderr)
+            out.append(rec(doc, page)); continue
+        resp = json.load(open(cp))
+        pg = (resp.get("pages") or [{}])[0]
+        md, tables, figures = M.reduce_page(pg)
+        extra_nums = "\n".join(tables) + "\n" + "\n".join(f["content"] for f in figures)
+        out.append(rec(doc, page, text=md, tables=tables, figures=figures,
+                       ordered=[md], extra_nums=extra_nums))
+    return out
+
+
 def _from_blocks(blocks):
     text_parts, tables, figures, ordered = [], [], [], []
     for b in blocks:
@@ -297,6 +323,7 @@ COLLECTORS = {
     "llamaparse": collect_llamaparse, "landingai": collect_landingai,
     "landingai_dpt2": collect_landingai_dpt2,
     "liteparse": collect_liteparse,
+    "mistral": collect_mistral,
     "gpt5_image": lambda: collect_gpt5("image"), "gpt5_file": lambda: collect_gpt5("file"),
     "gemini_flash": lambda: collect_gemini("gemini_flash"),
     "gemini_flash_lite": lambda: collect_gemini("gemini_flash_lite"),

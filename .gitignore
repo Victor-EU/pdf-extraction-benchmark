@@ -10,6 +10,8 @@ __pycache__/
 venv/
 .venv-docling/
 .venv-liteparse/
+.venv-mistral/
+.venv-*/
 
 # ── OS / editor ─────────────────────────────────────────
 .DS_Store
@@ -24,3 +26,5 @@ Data/
 ground_truth/
 results/*
 !results/*.md
+# the single takeaway chart is aggregate scores only (no corpus content) — published
+!results/TAKEAWAY_quality_vs_trust.png

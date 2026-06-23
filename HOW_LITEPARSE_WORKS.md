@@ -90,5 +90,5 @@ That single mechanism — grid projection — is both why LiteParse beats a raw 
 prose/simple tables and why it scored **below** PyMuPDF on dense finance tables (62% vs 68%
 structure-aware): when the projection guesses the column structure wrong, it asserts a layout that is
 *actively misleading* rather than just dumping text. See [`LITEPARSE_ADD.md`](LITEPARSE_ADD.md) for the
-full benchmark result and [`FINAL_REPORT.md`](FINAL_REPORT.md) for where it lands among all nine
+full benchmark result and [`FINAL_REPORT.md`](FINAL_REPORT.md) for where it lands among all ten
 vendors.

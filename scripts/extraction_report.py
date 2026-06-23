@@ -9,19 +9,20 @@ VEND_LABEL = {
     "gemini_flash": "Gemini 3.5 Flash", "gemini_flash_lite": "Gemini 3.1 Flash-Lite",
     "landingai": "Landing AI",
     "llamaparse": "LlamaParse", "pymupdf": "PyMuPDF", "tesseract": "Tesseract",
-    "liteparse": "LiteParse",
+    "liteparse": "LiteParse", "mistral": "Mistral OCR 4",
 }
 ORDER = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-         "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse"]
+         "landingai", "llamaparse", "mistral", "pymupdf", "tesseract", "liteparse"]
 # coordinate-grounding capability (does the vendor emit element positions?)
 COORDS = {"gpt5_image": "coarse", "gpt5_file": "coarse",
           "gemini_flash": "coarse", "gemini_flash_lite": "coarse", "landingai": "exact boxes",
           "llamaparse": "exact boxes", "pymupdf": "exact boxes", "tesseract": "word boxes",
-          "liteparse": "exact boxes"}
+          "liteparse": "exact boxes", "mistral": "exact boxes"}
 COST = {"gpt5_image": "$13.82", "gpt5_file": "$12.54",
         "gemini_flash": "$7.12", "gemini_flash_lite": "$1.12",
         "landingai": "paid", "llamaparse": "paid (agentic)",
-        "pymupdf": "$0", "tesseract": "$0", "liteparse": "$0 (local)"}
+        "pymupdf": "$0", "tesseract": "$0", "liteparse": "$0 (local)",
+        "mistral": "$5/1k pages"}
 
 
 def pct(x):
@@ -69,7 +70,7 @@ def main():
       "the v3 page-category labels. Two metric families:")
     w("- **Objective** (vs a vendor-neutral reference = born-digital text-layer ∪ image-region OCR): "
       "content-token recall, numeric/finance recall, table emission, reading order.")
-    w("- **Figure judging** (blind gpt-5 vision judge vs the page image, all 8 vendors shuffled A–H): "
+    w("- **Figure judging** (blind gpt-5 vision judge vs the page image, all 10 vendors shuffled A–J): "
       f"graph-data fidelity over {n_graph_pages} graph pages, diagram-structure fidelity over "
       f"{n_diag_pages} diagram pages.")
     w("")

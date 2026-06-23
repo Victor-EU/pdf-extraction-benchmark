@@ -4,7 +4,7 @@
 
 "Full extraction" = **text + tables + diagram descriptions + graph data + spatial layout** (the four dimensions Landing AI's output embodies). Scored on the 599-page corpus, segmented by the v3 page-category labels. Two metric families:
 - **Objective** (vs a vendor-neutral reference = born-digital text-layer ∪ image-region OCR): content-token recall, numeric/finance recall, table emission, reading order.
-- **Figure judging** (blind gpt-5 vision judge vs the page image, all 8 vendors shuffled A–H): graph-data fidelity over 123 graph pages, diagram-structure fidelity over 97 diagram pages.
+- **Figure judging** (blind gpt-5 vision judge vs the page image, all 10 vendors shuffled A–J): graph-data fidelity over 123 graph pages, diagram-structure fidelity over 97 diagram pages.
 
 ## The capability matrix
 
@@ -16,6 +16,7 @@
 | Gemini 3.1 Flash-Lite | 96% | 95% | 94% | **83%** | **82%** | 67% | coarse | $1.12 |
 | Landing AI | 95% | 93% | 91% | **80%** | **82%** | 63% | exact boxes | paid |
 | LlamaParse | 97% | 95% | 99% | **77%** | **30%** | – | exact boxes | paid (agentic) |
+| Mistral OCR 4 | 96% | 94% | 94% | **59%** | **60%** | – | exact boxes | $5/1k pages |
 | PyMuPDF | 97% | 97% | 57% | **29%** | **29%** | 90% | exact boxes | $0 |
 | Tesseract | 88% | 72% | 0% | **24%** | **29%** | 68% | word boxes | $0 |
 | LiteParse | 96% | 95% | 81% | **12%** | **14%** | – | exact boxes | $0 (local) |
@@ -34,6 +35,7 @@
 | Gemini 3.1 Flash-Lite | 83% | 82% | 83% |
 | Landing AI | 80% | 82% | 80% |
 | LlamaParse | 76% | 80% | 77% |
+| Mistral OCR 4 | 62% | 50% | 59% |
 | PyMuPDF | 29% | 28% | 29% |
 | Tesseract | 24% | 24% | 24% |
 | LiteParse | 12% | 13% | 12% |
@@ -48,6 +50,7 @@
 | Gemini 3.1 Flash-Lite | 83% | 77% | 82% |
 | Landing AI | 83% | 79% | 82% |
 | LlamaParse | 35% | 17% | 30% |
+| Mistral OCR 4 | 65% | 48% | 60% |
 | PyMuPDF | 30% | 26% | 29% |
 | Tesseract | 30% | 26% | 29% |
 | LiteParse | 17% | 5% | 14% |
@@ -66,6 +69,7 @@
 | Gemini 3.1 Flash-Lite | 96% | 99% | 96% | 98% | 88% | 94% |
 | Landing AI | 97% | 97% | 95% | 96% | 88% | 85% |
 | LlamaParse | 97% | 99% | 97% | 99% | 88% | 99% |
+| Mistral OCR 4 | 97% | 99% | 95% | 98% | 88% | 96% |
 | PyMuPDF | 96% | 100% | 99% | 99% | 84% | 99% |
 | Tesseract | 94% | 90% | 89% | 91% | 62% | 85% |
 | LiteParse | 97% | 96% | 98% | 97% | 80% | 98% |
@@ -80,6 +84,7 @@
 | Gemini 3.1 Flash-Lite | 96% | 100% | 89% | 97% | 90% | 100% |
 | Landing AI | 95% | 97% | 89% | 93% | 86% | 100% |
 | LlamaParse | 97% | 100% | 89% | 96% | 90% | 100% |
+| Mistral OCR 4 | 97% | 99% | 86% | 95% | 90% | 100% |
 | PyMuPDF | 96% | 100% | 99% | 98% | 90% | 100% |
 | Tesseract | 75% | 76% | 68% | 72% | 63% | 94% |
 | LiteParse | 97% | 97% | 97% | 96% | 73% | 100% |

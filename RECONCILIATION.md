@@ -37,7 +37,7 @@
 | **Question** | What fraction of a document's *real information* does each vendor convey? | Does each GT *fact* appear somewhere in the vendor's output? |
 | **Primitive** | Page-level holistic info capture, density-weighted | Atomic fact: text span / numeric value↔label / diagram node |
 | **Score** | Fair total = Σ(info_recall × page_weight) ÷ Σ(page_weight) | Recall = matched_facts ÷ GT_facts (**no precision**) |
-| **Scoring instrument** | LLM judge (gpt-5), blind, vendors shuffled A–H, per page | Deterministic string/token matcher (2000-char proximity window) |
+| **Scoring instrument** | LLM judge (gpt-5), blind, vendors shuffled A–J, per page | Deterministic string/token matcher (2000-char proximity window) |
 | **Paraphrase** | Credited (correct-but-different words score full) | Credited implicitly (substring/token match is loose) |
 | **Hallucination** | Measured as a separate `unsupported` fidelity column (not subtracted) | Not measured (recall-only by design) |
 | **Ground truth** | gpt-5 vision 599-page transcription (v2, text-layer-corrected); Claude-vision audited | GPT-5.5 + Claude-Sonnet-4.6 vision consensus, **Landing AI as tie-breaker** |

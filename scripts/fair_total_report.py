@@ -10,9 +10,10 @@ VEND_LABEL = {
     "gemini_flash": "Gemini 3.5 Flash", "gemini_flash_lite": "Gemini 3.1 Flash-Lite",
     "landingai": "Landing AI", "llamaparse": "LlamaParse",
     "pymupdf": "PyMuPDF", "tesseract": "Tesseract", "liteparse": "LiteParse",
+    "mistral": "Mistral OCR 4",
 }
 ORDER = ["landingai", "gemini_flash", "gpt5_image", "gpt5_file", "gemini_flash_lite",
-         "llamaparse", "pymupdf", "tesseract", "liteparse"]
+         "llamaparse", "mistral", "pymupdf", "tesseract", "liteparse"]
 REF = {"gpt5_image", "gpt5_file"}  # built the GT — upper bound, not comparable
 
 

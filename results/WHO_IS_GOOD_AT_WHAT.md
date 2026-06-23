@@ -1,9 +1,18 @@
 # Which vendor is good at what — element-level verdict
 
+> **⁂ Mistral OCR 4 (the 10th vendor, added 2026-06-23) is NOT in this element-level eval** — like
+> LiteParse and the DPT-2 re-bench, only the headline fair total + figure eval were run (the
+> 6,129-element re-judge was out of scope). Mistral OCR 4 (advanced config: `mistral-ocr-4-0` +
+> Document-AI bbox annotation) lands at **80% structure-aware — 5th among real vendors, vision tier**,
+> a genuine figure reader (chart-data 59 / diagram 60) — **but with the highest unsupported rate of
+> any vendor (19%): its annotation layer fabricates on graphics it can't parse**. Full
+> characterization in [`../MISTRAL_ADD.md`](../MISTRAL_ADD.md). On this table it would show a strong
+> text/table/KPI profile with mid figure scores and an elevated invented-content rate.
+
 > **⁂ LiteParse (the 9th vendor, added 2026-06-23) is NOT in this element-level eval** — only the
 > headline fair total + figure eval were run for it (this 6,129-element re-judge was out of scope, as
 > it was for the DPT-2 re-bench). LiteParse is a vision-blind text-layer tool that lands *below*
-> PyMuPDF (62% vs 68% structure-aware) and is the worst figure reader of all nine; its full
+> PyMuPDF (62% vs 68% structure-aware) and is the worst figure reader of all ten; its full
 > characterization is in [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md). On this table it would track
 > PyMuPDF's text-layer profile — strong prose/KPI, weak diagrams — but lower on tables/charts.
 

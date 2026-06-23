@@ -36,6 +36,7 @@ VENDORS = [  # (key, display)  -- ranking-relevant order; gpt-5 flagged upper-bo
     ("gemini_flash_lite", "Gemini 3.1 Flash-Lite"),
     ("llamaparse",        "LlamaParse (agentic)"),
     ("landingai",         "Landing AI"),
+    ("mistral",           "Mistral OCR 4"),
     ("pymupdf",           "PyMuPDF"),
     ("liteparse",         "LiteParse"),
     ("tesseract",         "Tesseract"),
