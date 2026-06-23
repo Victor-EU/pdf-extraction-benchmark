@@ -9,10 +9,10 @@ VEND_LABEL = {
     "gpt5_image": "gpt-5 (image) ◆", "gpt5_file": "gpt-5 (file) ◆",
     "gemini_flash": "Gemini 3.5 Flash", "gemini_flash_lite": "Gemini 3.1 Flash-Lite",
     "landingai": "Landing AI", "llamaparse": "LlamaParse",
-    "pymupdf": "PyMuPDF", "tesseract": "Tesseract",
+    "pymupdf": "PyMuPDF", "tesseract": "Tesseract", "liteparse": "LiteParse",
 }
 ORDER = ["landingai", "gemini_flash", "gpt5_image", "gpt5_file", "gemini_flash_lite",
-         "llamaparse", "pymupdf", "tesseract"]
+         "llamaparse", "pymupdf", "tesseract", "liteparse"]
 REF = {"gpt5_image", "gpt5_file"}  # built the GT — upper bound, not comparable
 
 
@@ -91,9 +91,14 @@ def main():
         w(f"| {VEND_LABEL[vd]} | **{pct(s)}** | {pct(c)} | {gap} | {pct(mean(S['unsup'][vd]))} |")
     w("")
     w("> **Structure gap** = content recall − structure-aware fair total = the share of a vendor's "
-      "apparent capture that does NOT survive a binding check. A large gap (PyMuPDF, Tesseract) marks a "
-      "tool that recovers characters but loses structure; a small gap marks downstream-usable output. "
-      "**Unsupported** now counts actively wrong bindings (a value under the wrong key) as contradictions.")
+      "apparent capture that does NOT survive a binding check. The largest gaps (LiteParse −18, PyMuPDF, "
+      "Tesseract) mark tools that recover characters but lose structure; a small gap marks "
+      "downstream-usable output. LiteParse's gap is the widest of all: its heuristic markdown emits "
+      "table/heading *shapes* (table-presence 81%, well above PyMuPDF's 57%) but on dense multi-column "
+      "finance pages its grid projection merges adjacent columns into a jumble whose bindings the judge "
+      "cannot recover — so the table-shaped output is not rewarded, and it scores *below* PyMuPDF's "
+      "honest flat dump (62 vs 68). **Unsupported** now counts actively wrong bindings (a value under the "
+      "wrong key) as contradictions.")
     w("")
     w("## Fair total by page category (structure-aware)")
     w("")

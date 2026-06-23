@@ -1,6 +1,6 @@
 # PDF Extraction Benchmark
 
-A structure-aware benchmark of **8 PDF extraction approaches** — vision LLMs, hosted document parsers, and local text-layer/OCR tools — measured on how much of a complex business document's *actual information* (text, tables, chart data, diagram structure, layout) each one recovers **with the bindings intact**.
+A structure-aware benchmark of **9 PDF extraction approaches** — vision LLMs, hosted document parsers, and local text-layer/OCR tools — measured on how much of a complex business document's *actual information* (text, tables, chart data, diagram structure, layout) each one recovers **with the bindings intact**.
 
 The headline metric is the **structure-aware fair total**: a value counts only if its binding is recoverable (which row / column / series / node it belongs to). On finance/M&A/consulting documents, a number bound to the wrong row is an *active downstream error* — worse than an omission — so structure is scored, not caveated.
 
@@ -13,14 +13,17 @@ Corpus: 3 finance/business PDFs, 599 pages (a French consulting deck, an English
 | Rank | Vendor | Fair total (structure-aware) | Content recall | Structure gap | Cost (599pp) | Speed |
 |---:|---|---:|---:|---:|---:|---:|
 | 1 | **Gemini 3.5 Flash** | **89%** | 92% | −3 | $7.12 | 6.9 s/pg |
+| 2 | **Landing AI** (DPT-2) | **86%** | 89% | −3 | paid | 16.6 s/pg² |
 | 2 | Gemini 3.1 Flash-Lite | 86% | 90% | −4 | **$1.12** | 4.4 s/pg |
-| 3 | LlamaParse (agentic) | 86% | 90% | −4 | paid | 1.3 s/pg |
-| 4 | Landing AI | 81% | 87% | −6 | paid | 16.6 s/pg |
+| 2 | LlamaParse (agentic) | 86% | 90% | −4 | paid | 1.3 s/pg |
 | 5 | PyMuPDF | 68% | 84% | **−16** | $0 usage¹ | **0.11 s/pg** |
-| 6 | Tesseract | 52% | 64% | −12 | $0 | 1.2 s/pg |
+| 6 | LiteParse | 62% | 80% | **−18** | $0 (local) | 1.3 s/pg |
+| 7 | Tesseract | 52% | 64% | −12 | $0 | 1.2 s/pg |
 | ◆ | gpt-5 (image) | 88% ◆ | 91% | −3 | $13.82 | 4.1 s/pg |
 
-**Takeaways:** Gemini 3.5 Flash wins on capture at ~half gpt-5's cost; Flash-Lite is the value frontier (86% for $1.12). Structure-aware scoring sorts vendors into two classes — structure-preservers lose ≤6 pts vs raw content recall, the two pure-text-dump tools (PyMuPDF, Tesseract) lose 11–16. Speed runs *opposite* to quality (fastest tool is the weakest). See the report for the full per-category, per-document, cost, and speed breakdowns plus the four-way ground-truth validation.
+**Takeaways:** Gemini 3.5 Flash wins on capture at ~half gpt-5's cost; Flash-Lite is the value frontier (86% for $1.12). **Landing AI on DPT-2 (re-benchmarked 2026-06-15, was 81% on the legacy endpoint) joins the high-quality tier — tied 2nd, best-in-class on Image/Photo; see [`LANDINGAI_DPT2_REBENCH.md`](LANDINGAI_DPT2_REBENCH.md).** Structure-aware scoring sorts vendors into two classes — structure-preservers lose ≤6 pts vs raw content recall, the three local text-layer tools (PyMuPDF, LiteParse, Tesseract) lose 11–18. **LiteParse** (run-llama's OSS, the open-sourced core of LlamaParse *minus* the VLM) is vision-blind and lands *below* PyMuPDF (62 vs 68): its heuristic grid-projection markdown emits more table/heading shape than PyMuPDF but scrambles bindings on dense multi-column finance pages, giving it the **largest structure gap of any vendor (−18)**; see [`LITEPARSE_ADD.md`](LITEPARSE_ADD.md). Speed runs *opposite* to quality (fastest tool is the weakest). See the report for the full per-category, per-document, cost, and speed breakdowns plus the four-way ground-truth validation.
+
+² Landing AI's 16.6 s/pg is the page-by-page harness, not its native whole-document latency.
 
 ¹ PyMuPDF usage is free but it is **AGPL-3.0 / paid commercial** — not free for proprietary/SaaS use. Permissive text-layer alternatives: pdfplumber (MIT), pypdf (BSD). See `FINAL_REPORT.md` §6.
 
@@ -34,6 +37,9 @@ Corpus: 3 finance/business PDFs, 599 pages (a French consulting deck, an English
 | [`GT_VALIDATION.md`](GT_VALIDATION.md) | Four-axis ground-truth validation (audit → correction → re-measure → cross-family judge) |
 | [`RECONCILIATION.md`](RECONCILIATION.md) | Reconciliation with a second, independent audit |
 | [`ENTERPRISE_EXTRACTION_PLAYBOOK.md`](ENTERPRISE_EXTRACTION_PLAYBOOK.md) | Practical routing/build guidance distilled from the results |
+| [`LANDINGAI_DPT2_REBENCH.md`](LANDINGAI_DPT2_REBENCH.md) | Landing AI re-benchmarked on DPT-2 (full corpus, both judges, validated splice) — 81→86% |
+| [`LITEPARSE_ADD.md`](LITEPARSE_ADD.md) | LiteParse (run-llama OSS) added as the 9th vendor (full corpus, both judges + figure eval, validated add) — 62% |
+| [`HOW_LITEPARSE_WORKS.md`](HOW_LITEPARSE_WORKS.md) | What LiteParse does concretely — the parse pipeline (PDFium → grid projection → markdown), with worked examples |
 | `AUDIT_*.md` | Measurement-artifact audits (judge-input cap, LlamaParse tier, PyMuPDF structure) |
 | `POC_DETERMINISTIC_SCORING.md` | Can a deterministic scorer replace the LLM judge? (partial) |
 | `results/*.md` | Per-vendor scorecards and the comparison tables behind the report |

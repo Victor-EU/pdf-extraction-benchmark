@@ -1,5 +1,7 @@
 # Extraction-Quality Comparison — how completely each vendor recovers a page's information
 
+> **⁂ The Landing AI row is the legacy pre-DPT-2 endpoint.** This element-level eval has **not** been re-run on the current `dpt-2-latest` model (only the headline fair total was; see [`../LANDINGAI_DPT2_REBENCH.md`](../LANDINGAI_DPT2_REBENCH.md)). DPT-2 raised Landing AI's structure-aware table 80→86 and chart 73→78, so treat the Landing AI numbers below as a **floor**. Every other vendor is current.
+
 "Full extraction" = **text + tables + diagram descriptions + graph data + spatial layout** (the four dimensions Landing AI's output embodies). Scored on the 599-page corpus, segmented by the v3 page-category labels. Two metric families:
 - **Objective** (vs a vendor-neutral reference = born-digital text-layer ∪ image-region OCR): content-token recall, numeric/finance recall, table emission, reading order.
 - **Figure judging** (blind gpt-5 vision judge vs the page image, all 8 vendors shuffled A–H): graph-data fidelity over 123 graph pages, diagram-structure fidelity over 97 diagram pages.
@@ -13,9 +15,10 @@
 | Gemini 3.5 Flash | 97% | 96% | 98% | **85%** | **91%** | 67% | coarse | $7.12 |
 | Gemini 3.1 Flash-Lite | 96% | 95% | 94% | **83%** | **82%** | 67% | coarse | $1.12 |
 | Landing AI | 95% | 93% | 91% | **80%** | **82%** | 63% | exact boxes | paid |
-| LlamaParse | 97% | 97% | 98% | **77%** | **30%** | 69% | exact boxes | $0 (free tier) |
+| LlamaParse | 97% | 95% | 99% | **77%** | **30%** | – | exact boxes | paid (agentic) |
 | PyMuPDF | 97% | 97% | 57% | **29%** | **29%** | 90% | exact boxes | $0 |
 | Tesseract | 88% | 72% | 0% | **24%** | **29%** | 68% | word boxes | $0 |
+| LiteParse | 96% | 95% | 81% | **12%** | **14%** | – | exact boxes | $0 (local) |
 
 > Reading-order is Kendall-τ vs the reference order; PyMuPDF's is inflated because the reference uses the same layout engine — read it as a capability flag, not a ranking. Coordinates column is a capability: parsers emit exact boxes; gpt-5 emits only coarse positions.
 
@@ -33,6 +36,7 @@
 | LlamaParse | 76% | 80% | 77% |
 | PyMuPDF | 29% | 28% | 29% |
 | Tesseract | 24% | 24% | 24% |
+| LiteParse | 12% | 13% | 12% |
 
 ## Diagram-structure fidelity by category
 
@@ -46,6 +50,7 @@
 | LlamaParse | 35% | 17% | 30% |
 | PyMuPDF | 30% | 26% | 29% |
 | Tesseract | 30% | 26% | 29% |
+| LiteParse | 17% | 5% | 14% |
 
 > **LlamaParse diagram caveat.** This figure judge reads each vendor's *figure-typed* blocks; LlamaParse (agentic) delivers its diagram content as **inline markdown prose**, not figure blocks, so this metric under-counts it (~30 here). The element-level judge, which reads LlamaParse's full markdown, scores its diagrams **83** (gpt-5) / **86** (Gemini) — see `results/ELEMENT_AUDIT.md`. Its graph-data score (77, up from 51 at the accurate tier) rises here because tabulated chart data lands in its tables. Read the element-level diagram number as the true figure capability.
 
@@ -60,9 +65,10 @@
 | Gemini 3.5 Flash | 97% | 99% | 99% | 99% | 88% | 99% |
 | Gemini 3.1 Flash-Lite | 96% | 99% | 96% | 98% | 88% | 94% |
 | Landing AI | 97% | 97% | 95% | 96% | 88% | 85% |
-| LlamaParse | 95% | 99% | 99% | 99% | 88% | 98% |
+| LlamaParse | 97% | 99% | 97% | 99% | 88% | 99% |
 | PyMuPDF | 96% | 100% | 99% | 99% | 84% | 99% |
 | Tesseract | 94% | 90% | 89% | 91% | 62% | 85% |
+| LiteParse | 97% | 96% | 98% | 97% | 80% | 98% |
 
 **Numeric (finance) recall:**
 
@@ -73,9 +79,10 @@
 | Gemini 3.5 Flash | 96% | 99% | 95% | 98% | 90% | 100% |
 | Gemini 3.1 Flash-Lite | 96% | 100% | 89% | 97% | 90% | 100% |
 | Landing AI | 95% | 97% | 89% | 93% | 86% | 100% |
-| LlamaParse | 95% | 100% | 99% | 98% | 90% | 100% |
+| LlamaParse | 97% | 100% | 89% | 96% | 90% | 100% |
 | PyMuPDF | 96% | 100% | 99% | 98% | 90% | 100% |
 | Tesseract | 75% | 76% | 68% | 72% | 63% | 94% |
+| LiteParse | 97% | 97% | 97% | 96% | 73% | 100% |
 
 ## Notes & caveats
 

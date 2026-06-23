@@ -96,9 +96,9 @@ The methodological core of this benchmark is that it has **two independent groun
 
 ---
 
-## 4. The eight approaches under test
+## 4. The nine approaches under test
 
-Three architectural families, eight configurations. Each produces a normalized per-page record (`scripts/collect_extractions.py` → `results/_extract_<vendor>.json`) and a full reconstructed document (`scripts/build_vendor_md.py` → `results/vendor_md/<vendor>.md`).
+Three architectural families, nine configurations. Each produces a normalized per-page record (`scripts/collect_extractions.py` → `results/_extract_<vendor>.json`) and a full reconstructed document (`scripts/build_vendor_md.py` → `results/vendor_md/<vendor>.md`).
 
 | # | Vendor / config | Family | How it sees the page | Coordinates |
 |---|---|---|---|---|
@@ -110,11 +110,12 @@ Three architectural families, eight configurations. Each produces a normalized p
 | 6 | **LlamaParse** (agentic tier) | Specialized doc parser (LVM agent loop) | Layout + table + figure-reading model | **exact boxes** |
 | 7 | **PyMuPDF** | Classical text-layer | Embedded text + `find_tables()` | **exact boxes** |
 | 8 | **Tesseract** | Classical OCR | Full-page OCR on rasterized pages | word boxes |
+| 9 | **LiteParse** (run-llama OSS) | Classical text-layer + spatial grid | PDFium text → anchor grid-projection → heuristic markdown (auto-OCR on sparse pages) | **exact boxes** |
 
 **Controls baked into the line-up:**
 - **gpt-5 image vs file** isolates *render-PNG vs native-PDF* input for the same model.
 - **Gemini runs the byte-identical prompt + schema as gpt-5**, in image mode, so the gpt-5↔Gemini gap isolates *the model*, not the harness. (`thinkingLevel=minimal` ≈ gpt-5 `effort=low`.)
-- **PyMuPDF and Tesseract are the zero-*usage*-cost floor** — the value question is "how much does paying buy you over a born-digital text dump / plain OCR?" (License caveat: **Tesseract is Apache-2.0** — truly free; **PyMuPDF is AGPL-3.0 or a paid Artifex commercial license** — $0 to *run* but *not* free for proprietary/SaaS deployment, where pdfplumber (MIT) / pypdf (BSD) are the permissive equivalents. See `FINAL_REPORT.md` §6 note ¹.)
+- **PyMuPDF, LiteParse and Tesseract are the zero-*usage*-cost local floor** — the value question is "how much does paying buy you over a born-digital text dump / spatial-grid markdown / plain OCR?" (License: **Tesseract is Apache-2.0** and **LiteParse is Apache-2.0** — both truly free, including proprietary/SaaS; **PyMuPDF is AGPL-3.0 or a paid Artifex commercial license** — $0 to *run* but *not* free for proprietary/SaaS deployment, where pdfplumber (MIT) / pypdf (BSD) / LiteParse are the permissive equivalents. See `FINAL_REPORT.md` §6 note ¹.) **LiteParse is the open-sourced core of LlamaParse minus the VLM** — included to test whether its spatial "grid-projection" markdown beats a plain PyMuPDF text dump (it does on prose, *not* on structured finance data — see `LITEPARSE_ADD.md`).
 - **Landing AI and LlamaParse are the specialized parsers** — the ones that emit exact element coordinates, which no LLM does.
 
 ---
@@ -131,7 +132,7 @@ The scoring evolved as earlier metrics were found to either **saturate** or **mi
 
 - **Objective recall**, scored against a **vendor-neutral reference** = (born-digital text-layer) ∪ (image-region OCR), *not* any vendor's output:
   - **Content-token recall**, **numeric/finance recall**, **table recovery**, **reading order** (Kendall-τ).
-- **Figure judging** — a **blind gpt-5 vision judge** grades against the *page image* (not against a vendor), all 8 extractions shuffled A–H:
+- **Figure judging** — a **blind gpt-5 vision judge** grades against the *page image* (not against a vendor), all 9 extractions shuffled A–I:
   - **graph-data fidelity** over the 123 graph pages, **diagram-structure fidelity** over the 97 diagram pages.
 
 > **The `table_recovery` correction (the original spark for this audit).** The first table metric scored Landing AI at **56%**, which looked wrong. Two bugs were found and fixed:
@@ -145,7 +146,7 @@ The scoring evolved as earlier metrics were found to either **saturate** or **mi
 ### Gen 3 — The fair total (the headline)
 `scripts/score_fair_total.py` + `scripts/fair_total_report.py`. A **document-level, paraphrase-tolerant, density-weighted** measure of *how much of the document's real information each vendor conveyed*.
 
-- **Unit of judgment:** the page. For each of the 599 pages, a **blind gpt-5 judge** sees the `GROUND_TRUTH.md` page plus **all 8 vendors' full page markdown, shuffled A–H**, and returns, per vendor:
+- **Unit of judgment:** the page. For each of the 599 pages, a **blind gpt-5 judge** sees the `GROUND_TRUTH.md` page plus **all 9 vendors' full page markdown, shuffled A–I**, and returns, per vendor:
   - `info_recall` (0–100): what fraction of the GT's substantive information (facts, numbers, table cells, **chart data values**, diagram nodes/relationships, labels) the extraction conveys. **Equivalent phrasing is credited as fully correct** — a chart described in different-but-correct words with the same numbers scores full marks. Information is rewarded, not verbosity or wording.
   - `unsupported` (0–100): the fidelity flag — what fraction of the extraction's claims **contradict** the GT or assert **wrong/invented** facts. *Crucially, this counts only genuine errors* — a fuller-but-consistent description is **not** penalized. (This definition was tightened after a v1 smoke test over-penalized Landing AI's verbose figure prose as "unsupported"; see §6.)
   - `page_info_weight` (1–10): how much real information the page holds (1 = a divider/title; 10 = a dense data table or multi-series chart).
@@ -231,7 +232,7 @@ Stated plainly, because a benchmark is only as honest as its caveats:
 | `ground_truth/RUBRIC.md` | locked 6-category rubric |
 | `ground_truth/reconcile/final_answer_key_v3.json` | Layer 1 — authoritative category key |
 | `ground_truth/GROUND_TRUTH.md` | Layer 2 — 599-page transcription reference |
-| `results/_extract_<vendor>.json` | normalized per-page extraction (8 vendors) |
+| `results/_extract_<vendor>.json` | normalized per-page extraction (9 vendors) |
 | `results/vendor_md/<vendor>.md` | each vendor's full reconstructed document |
 | `results/EXTRACTION_COMPARISON.md` | Gen-2 per-capability matrix |
 | `results/FAIR_TOTAL.md` | Gen-3 headline + per-category fair total |

@@ -12,7 +12,7 @@ Usage:  python3 scripts/build_vendor_md.py            # all vendors
 import os, json
 
 VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-           "landingai", "llamaparse", "pymupdf", "tesseract"]
+           "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse"]
 
 
 def page_md(rec):
@@ -25,8 +25,13 @@ def page_md(rec):
 
 
 def load_pages(vendor):
-    """(doc,page) -> page_md string."""
-    data = json.load(open(f"results/_extract_{vendor}.json"))
+    """(doc,page) -> page_md string.
+    LA_DPT2 env: re-benchmark hook — serve the `landingai` slot from the DPT-2 extract so the
+    canonical judges score DPT-2 in LA's position with byte-identical prompts otherwise."""
+    fn = vendor
+    if vendor == "landingai" and os.environ.get("LA_DPT2"):
+        fn = "landingai_dpt2"
+    data = json.load(open(f"results/_extract_{fn}.json"))
     return {(r["doc"], r["page"]): page_md(r) for r in data}
 
 

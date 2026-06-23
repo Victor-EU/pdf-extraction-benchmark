@@ -37,6 +37,7 @@ VENDORS = [  # (key, display)  -- ranking-relevant order; gpt-5 flagged upper-bo
     ("llamaparse",        "LlamaParse (agentic)"),
     ("landingai",         "Landing AI"),
     ("pymupdf",           "PyMuPDF"),
+    ("liteparse",         "LiteParse"),
     ("tesseract",         "Tesseract"),
     ("gpt5_file",         "gpt-5 file ◆"),
     ("gpt5_image",        "gpt-5 image ◆"),
@@ -52,8 +53,8 @@ vendors into 93–96 but separates PyMuPDF/Tesseract identically; both tables ar
 **1. The annual report is the easy genre; the M&A memo is the great separator — even more so
 under structure-aware scoring.** Every vendor peaks **on IAR** (born-digital prose + clean
 labelled tables) and bottoms **on SOTER** (60% chart/diagram pages). On IAR the structure-
-preserving vendors converge in a ~3 pp band (Gemini Flash 94, LlamaParse 94, Landing AI 91); on
-SOTER they spread 14 pp (Flash 85 → Landing AI 71) and the full field spreads **47 pp** (down to
+preserving vendors converge in a ~1 pp band (Gemini Flash 94, LlamaParse 94, Landing AI 93); on
+SOTER they spread 9 pp (Flash 85 → LlamaParse 76) and the full field spreads **47 pp** (down to
 PyMuPDF 59, Tesseract 38). **Benchmark only on annual reports and you'd wrongly conclude all
 vendors are equivalent.**
 
@@ -67,19 +68,34 @@ not best, so the chart-heavy genre is its relatively weak document.
 
 **4. PyMuPDF drops to a clearly lower tier on every genre once structure is scored** (61 / 77 / 59).
 The content-recall inflation is gone: on SOTER it **no longer edges Landing AI — it now trails it
-badly (59 vs 71)**, because the chart-heavy memo is exactly where PyMuPDF's character dump loses
+badly (59 vs 78)**, because the chart-heavy memo is exactly where PyMuPDF's character dump loses
 the most structure. Its cover cliff in the deck genres persists (Alpha 21, SOTER 23 vs IAR 77 on
 text-rich annual-report covers). PyMuPDF remains a cheap, useful *text + born-digital-table* first
 pass, but the per-doc numbers now reflect downstream usability, not token presence. See
 [`../STRUCTURE_AWARE_SCORING.md`](../STRUCTURE_AWARE_SCORING.md), `AUDIT_PYMUPDF_STRUCTURE.md`.
 
-**5. "Tables are solved" holds only for annual-report tables.** IAR tables score 92–95 across the
+**5. "Tables are solved" holds only for annual-report tables.** IAR tables score 93–95 across the
 structure-preserving vendors (PyMuPDF 81), but the **French consulting deck's tables (Alpha) are
-materially harder** — Gemini Flash 79, LlamaParse 76, Landing AI 70, PyMuPDF 62 — denser,
+materially harder** — Gemini Flash 79, Landing AI 78, LlamaParse 76, PyMuPDF 62 — denser,
 multi-header, French-language tables. Genre, not just element type, drives table difficulty.
 
 **6. Tesseract degrades on every genre and worst on the chart memo** (50 / 60 / 38). A
 scanned-document floor, not a born-digital option, in any genre.
+
+**7. LiteParse (run-llama OSS) is a text-layer tool that scores *below* PyMuPDF once structure is
+priced in** (55 Alpha / 72 IAR / 51 SOTER → 62 corpus, vs PyMuPDF 68). It is the open-sourced core
+of LlamaParse minus the VLM layer, so like PyMuPDF/Tesseract it is **vision-blind** (0 figure
+descriptions) and follows the same genre shape — best on the annual report, worst on the chart memo.
+The twist: its heuristic "grid-projection" markdown emits far more table/heading *shape* than
+PyMuPDF (table-presence 81% vs 57%) and it actually **beats PyMuPDF on plain-text and image/photo
+pages** (Text 85 vs 80, Image 54 vs 28), but it **loses on every structured category** (Table 60 vs
+71, Chart 45 vs 54, Mixed 71 vs 79): on dense multi-column pages the projection merges adjacent
+columns into a jumble whose row/column bindings are unrecoverable, so the table-shaped output earns
+no structure credit. Its structure gap (−18, content 80 → structure 62) is the **largest of any
+vendor** — it captures the characters but loses the most structure relative to what it captured.
+Verdict: a fast, local, Apache-2.0 *text-and-prose* first pass, but on finance/M&A tables and charts
+PyMuPDF+fitz's native table extractor is the stronger free baseline, and any vision tool is a tier
+above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 
 """
 
@@ -163,7 +179,7 @@ def main():
                "document *genres*, with very different content profiles:\n")
     doc.append("> | Doc | Genre | Pages | Dominant content |\n> |---|---|---:|---|")
     doc.append("> | **Alpha** | Consulting report (French) | 156 | tables (58) + charts (34) |")
-    doc.append("> | **IAR** | Public annual report | 310 | prose (118 Text + 72 Mixed) + tables (52) |")
+    doc.append("> | **IAR** | Public annual report | 310 | prose (116 Text + 73 Mixed) + tables (54) |")
     doc.append("> | **SOTER** | M&A information memorandum | 133 | charts/diagrams (80 = 60% of pages) |")
     doc.append("\nAll numbers are the **structure-aware fair total** "
                "(`Σ recall×weight / Σ weight`), re-aggregated from the **canonical** "

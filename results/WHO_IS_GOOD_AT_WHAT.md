@@ -1,5 +1,18 @@
 # Which vendor is good at what — element-level verdict
 
+> **⁂ LiteParse (the 9th vendor, added 2026-06-23) is NOT in this element-level eval** — only the
+> headline fair total + figure eval were run for it (this 6,129-element re-judge was out of scope, as
+> it was for the DPT-2 re-bench). LiteParse is a vision-blind text-layer tool that lands *below*
+> PyMuPDF (62% vs 68% structure-aware) and is the worst figure reader of all nine; its full
+> characterization is in [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md). On this table it would track
+> PyMuPDF's text-layer profile — strong prose/KPI, weak diagrams — but lower on tables/charts.
+
+> **⁂ Landing AI numbers here are the legacy pre-DPT-2 endpoint** — this element-level eval was **not**
+> re-run on the current `dpt-2-latest` model (only the headline fair total was; see
+> [`../LANDINGAI_DPT2_REBENCH.md`](../LANDINGAI_DPT2_REBENCH.md)). DPT-2 lifted Landing AI's
+> structure-aware table/chart scores, so its element-level numbers below are a **floor**. Every other
+> vendor is current.
+
 > **Consistent with the structure-aware headline (2026-06-14).** This element-level eval already
 > prices structure per element type (e.g. PyMuPDF diagrams 50 vs charts 83), which is *why* it
 > foresaw the headline change: the tools weak here on diagrams/figures are exactly the ones that drop

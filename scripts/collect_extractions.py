@@ -168,6 +168,92 @@ def collect_landingai():
     return out
 
 
+_LA_DPT2_ANCHOR = re.compile(r"<a id='[^']*'></a>")
+
+def _la_dpt2_clean(s):
+    """Strip DPT-2 format noise the legacy chunks never had: grounding anchors + fig delimiters."""
+    s = _LA_DPT2_ANCHOR.sub("", s or "")
+    s = s.replace("<::", "").replace("::>", "")
+    return re.sub(r"\n{3,}", "\n\n", s).strip()
+
+
+def collect_landingai_dpt2():
+    """DPT-2 (v1/ade/parse) raw -> vendor format, reduced the SAME way as collect_landingai so the
+    only judged difference vs legacy LA is content quality, not representation. New chunk shape:
+    top-level `chunks`, each {type, markdown, ...} (vs legacy data.chunks[].chunk_type/.text)."""
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        f = glob.glob(f"ground_truth/landingai_dpt2_full/raw/{doc}__p{page:04d}.png.json")
+        if not f:
+            out.append(rec(doc, page)); continue
+        data = json.load(open(f[0]))
+        text_parts, tables, figures, ordered = [], [], [], []
+        for c in data.get("chunks", []):
+            ct = c.get("type", "")
+            txt = _la_dpt2_clean(c.get("markdown") or c.get("text") or "")
+            if not txt:
+                continue
+            if ct == "table":
+                tables.append(txt); ordered.append(txt)
+            elif ct in ("figure", "image", "chart", "picture"):
+                figures.append({"kind": "unknown", "content": txt})
+                if _la_figure_is_table(txt):
+                    tables.append(txt)
+            else:
+                text_parts.append(txt); ordered.append(txt)
+        out.append(rec(doc, page, text="\n".join(text_parts), tables=tables,
+                       figures=figures, ordered=ordered))
+    return out
+
+
+_LP_IMG = re.compile(r"!\[[^\]]*\]\([^)]*\)")          # empty image placeholders ![](image_pNN_K.png)
+_LP_HR = re.compile(r"^\s*-{3,}\s*$", re.M)            # markdown horizontal rules (block separators)
+
+
+def _lp_clean(md):
+    """LiteParse is vision-blind: its image placeholders carry NO description, only a filename.
+    Strip them (they convey zero information; keeping them would just be noise the judge ignores
+    or mild padding). Collapse the blank lines they leave behind."""
+    md = _LP_IMG.sub("", md or "")
+    return re.sub(r"\n{3,}", "\n\n", md).strip()
+
+
+def _lp_tables(md):
+    """Pull contiguous markdown pipe-table blocks (>=2 rows containing '|') out of the page md,
+    for the table-recovery stat / element eval. The fair-total judge reads the full md (ordered_full),
+    so this does not affect the headline — it just lets table counts be reported like other vendors."""
+    tables, cur = [], []
+    for ln in md.splitlines():
+        if ln.count("|") >= 2:
+            cur.append(ln)
+        else:
+            if len(cur) >= 2:
+                tables.append("\n".join(cur))
+            cur = []
+    if len(cur) >= 2:
+        tables.append("\n".join(cur))
+    return tables
+
+
+def collect_liteparse():
+    """LiteParse (run-llama OSS) raw per-page markdown -> vendor format. Text-layer + spatial-grid
+    tool with NO figure understanding, so figures=[] (like pymupdf/tesseract). Its richest
+    representation is the reconstructed markdown, which we serve whole as the single ordered block
+    (-> ordered_full = the page md), mirroring collect_llamaparse's LP_USE_PAGE_MD path."""
+    raw = "ground_truth/liteparse/raw"
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        cp = os.path.join(raw, f"{doc}__p{page:04d}.md")
+        if not os.path.exists(cp):
+            print(f"  [skip] {doc} p{page}: no raw at {cp}", file=sys.stderr)
+            out.append(rec(doc, page)); continue
+        md = _lp_clean(open(cp).read())
+        out.append(rec(doc, page, text=md, tables=_lp_tables(md), figures=[], ordered=[md]))
+    return out
+
+
 def _from_blocks(blocks):
     text_parts, tables, figures, ordered = [], [], [], []
     for b in blocks:
@@ -209,6 +295,8 @@ def collect_gemini(slug):
 COLLECTORS = {
     "pymupdf": collect_pymupdf, "tesseract": collect_tesseract,
     "llamaparse": collect_llamaparse, "landingai": collect_landingai,
+    "landingai_dpt2": collect_landingai_dpt2,
+    "liteparse": collect_liteparse,
     "gpt5_image": lambda: collect_gpt5("image"), "gpt5_file": lambda: collect_gpt5("file"),
     "gemini_flash": lambda: collect_gemini("gemini_flash"),
     "gemini_flash_lite": lambda: collect_gemini("gemini_flash_lite"),

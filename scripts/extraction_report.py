@@ -9,17 +9,19 @@ VEND_LABEL = {
     "gemini_flash": "Gemini 3.5 Flash", "gemini_flash_lite": "Gemini 3.1 Flash-Lite",
     "landingai": "Landing AI",
     "llamaparse": "LlamaParse", "pymupdf": "PyMuPDF", "tesseract": "Tesseract",
+    "liteparse": "LiteParse",
 }
 ORDER = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-         "landingai", "llamaparse", "pymupdf", "tesseract"]
+         "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse"]
 # coordinate-grounding capability (does the vendor emit element positions?)
 COORDS = {"gpt5_image": "coarse", "gpt5_file": "coarse",
           "gemini_flash": "coarse", "gemini_flash_lite": "coarse", "landingai": "exact boxes",
-          "llamaparse": "exact boxes", "pymupdf": "exact boxes", "tesseract": "word boxes"}
+          "llamaparse": "exact boxes", "pymupdf": "exact boxes", "tesseract": "word boxes",
+          "liteparse": "exact boxes"}
 COST = {"gpt5_image": "$13.82", "gpt5_file": "$12.54",
         "gemini_flash": "$7.12", "gemini_flash_lite": "$1.12",
-        "landingai": "paid", "llamaparse": "$0 (free tier)",
-        "pymupdf": "$0", "tesseract": "$0"}
+        "landingai": "paid", "llamaparse": "paid (agentic)",
+        "pymupdf": "$0", "tesseract": "$0", "liteparse": "$0 (local)"}
 
 
 def pct(x):
@@ -55,6 +57,12 @@ def main():
     def w(s=""): L.append(s)
 
     w("# Extraction-Quality Comparison — how completely each vendor recovers a page's information")
+    w("")
+    w("> **⁂ The Landing AI row is the legacy pre-DPT-2 endpoint.** This element-level eval has **not** "
+      "been re-run on the current `dpt-2-latest` model (only the headline fair total was; see "
+      "[`../LANDINGAI_DPT2_REBENCH.md`](../LANDINGAI_DPT2_REBENCH.md)). DPT-2 raised Landing AI's "
+      "structure-aware table 80→86 and chart 73→78, so treat the Landing AI numbers below as a "
+      "**floor**. Every other vendor is current.")
     w("")
     w("\"Full extraction\" = **text + tables + diagram descriptions + graph data + spatial layout** "
       "(the four dimensions Landing AI's output embodies). Scored on the 599-page corpus, segmented by "
