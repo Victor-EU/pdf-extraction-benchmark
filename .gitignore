@@ -26,5 +26,7 @@ Data/
 ground_truth/
 results/*
 !results/*.md
+# the single takeaway chart is aggregate scores only (no corpus content) — published
+!results/TAKEAWAY_quality_vs_checkbox.png
 # old finance-corpus vendor reproductions (full 599-page extractions) — data, not published
 archive/old_corpus_artifacts/
