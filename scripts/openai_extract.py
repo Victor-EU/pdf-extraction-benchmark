@@ -2,21 +2,27 @@
 """gpt-5 FULL-EXTRACTION harness (distinct from the classifier openai_parser.py).
 
 Re-runs gpt-5 over every page asking it to RECONSTRUCT the page's full information as an
-ordered list of blocks, covering the four+graph extraction dimensions:
-  1. text   - verbatim prose/headings/marginalia
-  2. table  - rendered as GitHub-markdown tables (cells preserved, not flattened)
-  3. figures - typed graph|diagram|photo|logo, each with a description; and for GRAPHS the
-               recovered DATA (chart type, title, axes+scale, series, per-point values, trend)
-  4. spatial - each block carries reading-order (array order) + a coarse position tag
+ordered list of blocks, covering the extraction dimensions that matter for administrative /
+insurance documents (forms, tables, prose):
+  1. text   - verbatim prose/headings/marginalia (accents + ﬁ/ﬂ ligatures preserved)
+  2. field  - labelled form fields: field_label -> field_value (value "" when blank)
+  3. choice - checkbox/radio options with their checked|unchecked STATE (the hardest, highest
+              value signal — a misread tick is an active downstream error)
+  4. table  - rendered as GitHub-markdown tables (cells preserved, not flattened)
+  5. spatial - each block carries reading-order (array order) + a coarse position tag
+(figures collapse to photo|logo — these documents have no charts/diagrams.)
 
 Two input methods (image = rendered PNG; file = native 1-page PDF), same prompt/schema, so the
 comparison isolates input method. Resumable per-page cache, threaded.
 Output: results/_openai_<mode>_extract.json  +  ground_truth/openai_<mode>_extract/raw/.
 """
-import os, sys, json, time, base64, glob, threading
+import os, sys, json, time, base64, threading
 from concurrent.futures import ThreadPoolExecutor
 import fitz
 from openai import OpenAI
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corpus import discover_pdfs
 
 if os.path.exists(".env"):
     for _l in open(".env"):
@@ -27,24 +33,30 @@ MODEL = "gpt-5"
 PRICE_IN, PRICE_OUT = 1.25, 10.0
 
 PROMPT = (
-"You are a document-parsing engine. RECONSTRUCT the FULL information content of this ONE PDF page "
-"as an ordered list of blocks, in natural READING ORDER. Capture EVERYTHING on the page — miss nothing.\n\n"
+"You are a document-parsing engine for ADMINISTRATIVE / INSURANCE documents (forms, tables, and "
+"prose — e.g. employer attestations, benefit-claim and social-aid forms). RECONSTRUCT the FULL "
+"information content of this ONE PDF page as an ordered list of blocks, in natural READING ORDER. "
+"Capture EVERYTHING on the page — miss nothing.\n\n"
 "For each block set:\n"
-"- type: text | heading | table | figure | marginalia | other\n"
+"- type: text | heading | field | choice | table | figure | marginalia | other\n"
 "- position: coarse location on the page (top-left … bottom-right, or full-page)\n"
-"- figure_kind: for figures only, one of graph|diagram|photo|logo (else 'none')\n"
+"- field_label / field_value: for type=field ONLY (else empty strings)\n"
+"- choice_label / choice_state: for type=choice ONLY (else empty / 'none')\n"
+"- figure_kind: for type=figure ONLY, one of photo|logo (else 'none')\n"
 "- content: see rules below\n\n"
 "CONTENT RULES:\n"
-"• text/heading/marginalia: transcribe the text VERBATIM (keep numbers, units, punctuation exactly). "
-"Do not summarize.\n"
-"• table: render as a GitHub-markdown table with EVERY row and cell, headers included. Preserve all "
-"numbers exactly. Do not flatten a table into prose.\n"
-"• figure = graph/chart (line/bar/pie/scatter/area/waterfall): RECOVER THE DATA, not just a label. In "
-"content give: chart type; title; x-axis and y-axis labels WITH their scale/tick values; each series "
-"name; the per-point DATA VALUES (read/estimate them from the plot, mark estimates with ~); and the "
-"overall trend. Finance pages depend on these numbers — extract them.\n"
-"• figure = diagram (flow/process/cycle/org-chart/value-chain/network): describe the structure — the "
-"components/nodes, their labels, and the relationships/flow between them.\n"
+"• text/heading/marginalia: transcribe the text VERBATIM — keep numbers, accents, and punctuation "
+"exactly (e.g. é, è, à, ç, and ﬁ/ﬂ ligatures as written). Do not summarize.\n"
+"• field = a labelled form field (a printed label with a fill-in value): put the printed label in "
+"field_label and the entered/printed value in field_value (field_value = \"\" if the field is BLANK). "
+"Mirror it in content as 'label: value'. Bind each value to its OWN label — never to a neighbouring one.\n"
+"• choice = a checkbox or radio option: put the option's text in choice_label and set choice_state to "
+"'checked' or 'unchecked' by reading the box/mark in the IMAGE. THIS IS CRITICAL — a box reported as "
+"checked when it is empty (or empty when it is checked) is an active downstream error. Mirror in "
+"content as '[x] label' or '[ ] label'. For a radio group, exactly the selected option is 'checked'.\n"
+"• table: render as a GitHub-markdown table with EVERY row, cell and header. Preserve all numbers "
+"exactly. Do not flatten a table into prose. For a checkbox grid, add a column carrying each row's "
+"checked/unchecked state.\n"
 "• figure = photo/logo: one short factual description (what it shows / whose logo).\n\n"
 "Return only the blocks. Be exhaustive and faithful; never invent content that is not on the page."
 )
@@ -58,16 +70,23 @@ SCHEMA = {
                 "type": "object", "additionalProperties": False,
                 "properties": {
                     "type": {"type": "string",
-                             "enum": ["text", "heading", "table", "figure", "marginalia", "other"]},
+                             "enum": ["text", "heading", "field", "choice", "table",
+                                      "figure", "marginalia", "other"]},
                     "position": {"type": "string",
                                  "enum": ["top-left", "top-center", "top-right", "mid-left", "center",
                                           "mid-right", "bottom-left", "bottom-center", "bottom-right",
                                           "full-page"]},
+                    "field_label": {"type": "string"},
+                    "field_value": {"type": "string"},
+                    "choice_label": {"type": "string"},
+                    "choice_state": {"type": "string",
+                                     "enum": ["checked", "unchecked", "none"]},
                     "figure_kind": {"type": "string",
-                                    "enum": ["none", "graph", "diagram", "photo", "logo"]},
+                                    "enum": ["none", "photo", "logo"]},
                     "content": {"type": "string"},
                 },
-                "required": ["type", "position", "figure_kind", "content"],
+                "required": ["type", "position", "field_label", "field_value",
+                             "choice_label", "choice_state", "figure_kind", "content"],
             },
         },
     },
@@ -135,7 +154,7 @@ def main():
     workers = int(sys.argv[2]) if len(sys.argv) > 2 else 8
 
     manifest = json.load(open(os.path.join(render, "_manifest.json")))
-    pdfs = {os.path.splitext(os.path.basename(p))[0]: p for p in glob.glob("Data/*.pdf")}
+    pdfs = discover_pdfs()
 
     def task(m):
         doc, page = m["doc"], m["page"]

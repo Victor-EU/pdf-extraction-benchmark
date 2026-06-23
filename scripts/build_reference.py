@@ -11,10 +11,13 @@ For each page produces the target each vendor's extraction is graded against:
 
 Output: ground_truth/extraction_ref/{doc}__p{page:04d}.json
 """
-import os, re, json, glob
+import os, re, sys, json, glob
 import fitz
 import pytesseract
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corpus import discover_pdfs
 
 OUT = "ground_truth/extraction_ref"
 RENDER = "ground_truth/render_full"
@@ -76,7 +79,7 @@ def ocr_regions(doc, page_no, regions, page):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    pdfs = {os.path.splitext(os.path.basename(p))[0]: p for p in glob.glob("Data/*.pdf")}
+    pdfs = discover_pdfs()
     manifest = json.load(open(os.path.join(RENDER, "_manifest.json")))
     by_doc = {}
     for m in manifest:

@@ -26,9 +26,15 @@ def nums(s):
         if re.sub(r"[^\d]", "", t): out.add(t)
     return out
 
+KEY_PATH = os.environ.get("ANSWER_KEY", "ground_truth/answer_key.json")
+
 def key_cats():
-    return {(e["doc"], e["page"]): e["final_label"]
-            for e in json.load(open("ground_truth/reconcile/final_answer_key_v3.json"))["pages"]}
+    """Page-category key (form taxonomy). Optional: if absent, every page is '?' and the
+    by-category breakdown collapses to overall — the objective dims still compute."""
+    if not os.path.exists(KEY_PATH):
+        return {}
+    return {(e["doc"], e["page"]): e.get("label", e.get("final_label", "?"))
+            for e in json.load(open(KEY_PATH))["pages"]}
 
 def load_ref():
     ref = {}
@@ -104,7 +110,7 @@ def agg(rows, field, filt=None):
 
 def main():
     ref = load_ref(); cats = key_cats()
-    CATS = ["Text", "Table", "Chart/Diagram", "Mixed", "Cover/Divider", "Image/Photo"]
+    CATS = ["Text", "Form", "Table", "Mixed"]
     vendors = sys.argv[1:]
     report = {}
     for vd in vendors:

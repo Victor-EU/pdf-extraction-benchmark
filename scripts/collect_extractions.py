@@ -14,6 +14,9 @@ Output: results/_extract_<vendor>.json
 import os, re, sys, json, glob
 import fitz
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corpus import discover_pdfs
+
 _word_re = re.compile(r"[^\W\d_]+", re.UNICODE)
 _num_re = re.compile(r"\d[\d.,%/]*")
 RENDER = "ground_truth/render_full"
@@ -34,7 +37,7 @@ def manifest():
     return json.load(open(os.path.join(RENDER, "_manifest.json")))
 
 def pdfs():
-    return {os.path.splitext(os.path.basename(p))[0]: p for p in glob.glob("Data/*.pdf")}
+    return discover_pdfs()
 
 def rec(doc, page, text="", tables=None, figures=None, ordered=None, extra_nums=""):
     return {"doc": doc, "page": page,
@@ -103,9 +106,7 @@ def collect_llamaparse():
     raw_dir = os.environ.get("LP_RAW_DIR", "ground_truth/llamaparse/raw")
     use_page_md = os.environ.get("LP_USE_PAGE_MD", "0") == "1"
     out = []
-    DOCS = {"20190308_Projet_Alpha_Restitution": None, "IAR_FY25_EN": None,
-            "SOTER - Company Presentation - vFF": None}
-    for doc in DOCS:
+    for doc in discover_pdfs():
         path = f"{raw_dir}/{doc}.json"
         if not os.path.exists(path):
             print(f"  [skip] {doc}: no raw at {path}", file=sys.stderr)
@@ -168,18 +169,148 @@ def collect_landingai():
     return out
 
 
+_LA_DPT2_ANCHOR = re.compile(r"<a id='[^']*'></a>")
+
+def _la_dpt2_clean(s):
+    s = _LA_DPT2_ANCHOR.sub("", s or "")
+    s = s.replace("<::", "").replace("::>", "")
+    return re.sub(r"\n{3,}", "\n\n", s).strip()
+
+
+def collect_landingai_dpt2():
+    """DPT-2 (v1/ade/parse) raw -> vendor format, reduced like collect_landingai. New chunk shape:
+    top-level `chunks`, each {type, markdown}. DPT-2 adds form-aware types (attestation, scan_code,
+    logo) where the legacy model dumped generic `figure`/`text`."""
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        f = glob.glob(f"ground_truth/landingai_dpt2/raw/{doc}__p{page:04d}.png.json")
+        if not f:
+            out.append(rec(doc, page)); continue
+        data = json.load(open(f[0]))
+        text_parts, tables, figures, ordered = [], [], [], []
+        for c in data.get("chunks", []):
+            ct = c.get("type", "")
+            txt = _la_dpt2_clean(c.get("markdown") or c.get("text") or "")
+            if not txt:
+                continue
+            if ct == "table":
+                tables.append(txt); ordered.append(txt)
+            elif ct in ("figure", "image", "chart", "picture", "logo"):
+                figures.append({"kind": "unknown", "content": txt})
+                if _la_figure_is_table(txt):
+                    tables.append(txt)
+            else:  # text, marginalia, attestation, scan_code, ...
+                text_parts.append(txt); ordered.append(txt)
+        out.append(rec(doc, page, text="\n".join(text_parts), tables=tables,
+                       figures=figures, ordered=ordered))
+    return out
+
+
+def _block_text(b):
+    """Grader-facing rendering of one block. Forms add two structured block types whose
+    binding must survive into the page text: `field` (label->value) and `choice`
+    (checkbox/radio label + checked/unchecked state). Robust to models that populate the
+    structured keys but leave `content` empty (and vice-versa)."""
+    t = b.get("type")
+    content = (b.get("content") or "").strip()
+    if t == "field":
+        lbl = (b.get("field_label") or "").strip()
+        val = (b.get("field_value") or "").strip()
+        if content:
+            return content
+        return f"{lbl}: {val}".strip().strip(":").strip() if (lbl or val) else ""
+    if t == "choice":
+        lbl = (b.get("choice_label") or "").strip()
+        state = (b.get("choice_state") or "").strip().lower()
+        mark = "x" if state == "checked" else " "
+        if content:
+            return content
+        return f"[{mark}] {lbl}" if lbl else ""
+    return content
+
+
 def _from_blocks(blocks):
     text_parts, tables, figures, ordered = [], [], [], []
     for b in blocks:
-        t = b.get("type"); content = b.get("content", "") or ""
+        t = b.get("type")
         if t == "table":
-            tables.append(content); ordered.append(content)
+            c = (b.get("content") or "")
+            tables.append(c); ordered.append(c)
         elif t == "figure":
-            figures.append({"kind": b.get("figure_kind", "unknown"), "content": content})
-            # graph axis labels / data numbers count toward numeric recall too
-        else:
-            text_parts.append(content); ordered.append(content)
+            figures.append({"kind": b.get("figure_kind", "unknown"),
+                            "content": b.get("content", "") or ""})
+        else:  # text, heading, field, choice, marginalia, other
+            s = _block_text(b)
+            if s:
+                text_parts.append(s); ordered.append(s)
     return text_parts, tables, figures, ordered
+
+
+_LP_IMG = re.compile(r"!\[[^\]]*\]\([^)]*\)")           # empty image placeholders LiteParse emits
+_LP_PIPEROW = re.compile(r"^\s*\|.*\|\s*$")
+
+def _lp_clean(md):
+    """Drop LiteParse's empty `![](image_pNN_K.png)` placeholders (it is vision-blind — these carry
+    no content) and collapse the blank lines they leave behind."""
+    md = _LP_IMG.sub("", md or "")
+    return re.sub(r"\n{3,}", "\n\n", md).strip()
+
+def _lp_tables(md):
+    """Extract contiguous markdown pipe-table blocks so table recovery is credited like other
+    vendors. A block is >=2 consecutive pipe rows (header + at least one row / separator)."""
+    out, cur = [], []
+    for ln in (md or "").splitlines():
+        if _LP_PIPEROW.match(ln):
+            cur.append(ln.strip())
+        else:
+            if len(cur) >= 2:
+                out.append("\n".join(cur))
+            cur = []
+    if len(cur) >= 2:
+        out.append("\n".join(cur))
+    return out
+
+def collect_liteparse():
+    """LiteParse (run-llama OSS, LlamaParse core minus VLM): per-page reconstructed MARKDOWN from the
+    BORN-DIGITAL PDF (scripts/liteparse_run.py). Vision-blind, so figures=[] (placeholders stripped).
+    Serve the whole page markdown as one ordered block (ordered_full=md) — the same page-md path as
+    LlamaParse's agentic representation — and surface its heuristic pipe tables."""
+    raw = "ground_truth/liteparse/raw"
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        p = os.path.join(raw, f"{doc}__p{page:04d}.md")
+        md = _lp_clean(open(p).read()) if os.path.exists(p) else ""
+        out.append(rec(doc, page, text=md, tables=_lp_tables(md), figures=[], ordered=[md]))
+    return out
+
+
+def collect_mistral():
+    """Mistral OCR-4 (advanced config) raw per-page response -> vendor format. The page markdown
+    (tables inlined as HTML, image placeholders stripped) is the single ordered block (-> ordered_full,
+    like the LlamaParse page-md / LiteParse path); each annotated image becomes a figure {kind, content}
+    (parallel to collect_landingai's figure chunks) so OCR-4 is fairly credited on the form graphics
+    (logos, stamps, scanned regions). Reduction lives in mistral_common.reduce_page, shared with the
+    runner + input A/B so they cannot diverge. Table-cell text + figure descriptions join the numeric
+    pool (form values / amounts live there)."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import mistral_common as M
+    raw = "ground_truth/mistral/raw"
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        cp = os.path.join(raw, f"{doc}__p{page:04d}.json")
+        if not os.path.exists(cp):
+            print(f"  [skip] {doc} p{page}: no raw at {cp}", file=sys.stderr)
+            out.append(rec(doc, page)); continue
+        resp = json.load(open(cp))
+        pg = (resp.get("pages") or [{}])[0]
+        md, tables, figures = M.reduce_page(pg)
+        extra_nums = "\n".join(tables) + "\n" + "\n".join(f["content"] for f in figures)
+        out.append(rec(doc, page, text=md, tables=tables, figures=figures,
+                       ordered=[md], extra_nums=extra_nums))
+    return out
 
 
 def collect_gpt5(mode):
@@ -209,6 +340,9 @@ def collect_gemini(slug):
 COLLECTORS = {
     "pymupdf": collect_pymupdf, "tesseract": collect_tesseract,
     "llamaparse": collect_llamaparse, "landingai": collect_landingai,
+    "landingai_dpt2": collect_landingai_dpt2,
+    "liteparse": collect_liteparse,
+    "mistral": collect_mistral,
     "gpt5_image": lambda: collect_gpt5("image"), "gpt5_file": lambda: collect_gpt5("file"),
     "gemini_flash": lambda: collect_gemini("gemini_flash"),
     "gemini_flash_lite": lambda: collect_gemini("gemini_flash_lite"),

@@ -3,10 +3,23 @@
 
 Calls the ADE endpoint per rendered page image, saves raw JSON, and reduces the
 typed chunks to a dominant 6-category label (one of three ground-truth votes).
+
+⚠️ DEPRECATED ENDPOINT (2026-06-15). The ENDPOINT below is Landing AI's LEGACY pre-DPT-2
+`tools/agentic-document-analysis` (Basic auth, no model param). The current model is DPT-2 via
+`v1/ade/parse` (Bearer auth, model=dpt-2-latest) — see scripts/landingai_dpt2_check.py, which
+parses to ground_truth/landingai_dpt2/raw/ and is reduced by collect_landingai_dpt2(). The scored
+Landing AI extraction now uses DPT-2 (results/_extract_landingai_dpt2.json, via the LA_DPT2 hook in
+build_vendor_md.load_pages). This legacy file is retained only because its category votes were
+already baked into the (unchanged) ground-truth reconciliation; do not re-run it for scoring.
 """
 import os, sys, json, time, glob
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+if os.path.exists(".env"):
+    for _l in open(".env"):
+        if _l.startswith("VISION_AGENT_API_KEY="):
+            os.environ["VISION_AGENT_API_KEY"] = _l.split("=", 1)[1].strip()
 
 ENDPOINT = "https://api.va.landing.ai/v1/tools/agentic-document-analysis"
 CATS = ["Text", "Table", "Chart/Diagram", "Mixed", "Cover/Divider", "Image/Photo"]

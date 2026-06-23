@@ -1,18 +1,34 @@
 #!/usr/bin/env python3
-"""Reconstruct each vendor's FULL 599-page markdown document from its collected extraction,
-in reading order (text + tables already ordered, figure descriptions appended per page).
+"""Reconstruct each vendor's FULL markdown document (all corpus pages) from its collected
+extraction, in reading order: ordered text + tables, then field/choice lines and figure
+descriptions per page.
 
-These are the per-vendor documents diffed against ground_truth/GROUND_TRUTH.md by the
-document-level "fair total" judge (score_fair_total.py). Also writes readable consolidated
-files so the comparison can be eyeballed.
+NOTE: the structure-aware judge (score_fair_total_structure.py) consumes vendor text via
+`load_pages()` here, which reads results/_extract_<vendor>.json DIRECTLY — the .md files written
+below are human-eyeball artifacts only and do not feed the score. The judge target is the per-page
+ground truth in results/_gt_markdown.json (readable form: ground_truth/GROUND_TRUTH.md).
 
 Output: results/vendor_md/<vendor>.md  (one per vendor)
 Usage:  python3 scripts/build_vendor_md.py            # all vendors
 """
 import os, json
 
-VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-           "landingai", "llamaparse", "pymupdf", "tesseract"]
+# Canonical display order. VENDORS is filtered at import to those actually extracted
+# (results/_extract_<vendor>.json present), so a free-only run — e.g. just pymupdf +
+# tesseract — works without the paid vendors having been run. Override with the
+# VENDORS env var (comma-separated) to pin an explicit set.
+ALL_VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
+               "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral"]
+
+
+def available_vendors():
+    env = os.environ.get("VENDORS")
+    if env:
+        return [v.strip() for v in env.split(",") if v.strip()]
+    return [v for v in ALL_VENDORS if os.path.exists(f"results/_extract_{v}.json")]
+
+
+VENDORS = available_vendors()
 
 
 def page_md(rec):
@@ -25,7 +41,10 @@ def page_md(rec):
 
 
 def load_pages(vendor):
-    """(doc,page) -> page_md string."""
+    """(doc,page) -> page_md string.
+    LA_DPT2 env: serve the `landingai` slot from the DPT-2 extract (re-benchmark hook)."""
+    if vendor == "landingai" and os.environ.get("LA_DPT2"):
+        vendor = "landingai_dpt2"
     data = json.load(open(f"results/_extract_{vendor}.json"))
     return {(r["doc"], r["page"]): page_md(r) for r in data}
 

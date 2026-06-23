@@ -1,70 +1,129 @@
-# PDF Extraction Benchmark
+# PDF Extraction Benchmark — Insurance Forms
 
-A structure-aware benchmark of **8 PDF extraction approaches** — vision LLMs, hosted document parsers, and local text-layer/OCR tools — measured on how much of a complex business document's *actual information* (text, tables, chart data, diagram structure, layout) each one recovers **with the bindings intact**.
+A structure-aware benchmark of PDF-extraction approaches — vision LLMs, hosted document
+parsers, and local text-layer/OCR tools — measured on how much of a **dense, partially-filled
+insurance / administrative form** each one recovers **with the bindings intact**.
 
-The headline metric is the **structure-aware fair total**: a value counts only if its binding is recoverable (which row / column / series / node it belongs to). On finance/M&A/consulting documents, a number bound to the wrong row is an *active downstream error* — worse than an omission — so structure is scored, not caveated.
+The headline metric is the **structure-aware fair total**: a value counts only if its binding
+is recoverable — *which field label* it belongs to, *which row/column* of a table, and for a
+checkbox/radio, *whether it is ticked*. On these forms a value attached to the wrong field, or
+a checkbox read as ticked when it is blank, is an **active downstream error** — worse than an
+omission — so structure and checkbox state are scored, not caveated.
 
-> **📄 Start with [`FINAL_REPORT.md`](FINAL_REPORT.md).** Methodology and bias controls are in [`DESIGN.md`](DESIGN.md).
+> This repo is a re-aiming of a prior chart/finance-document benchmark onto an **insurance-form
+> corpus**. The chart/diagram/graph machinery is retired; the new structure primitives are the
+> **form field** (label → value) and the **checkbox/radio state**. The prior reports are kept
+> under `archive/`.
 
-## Headline result
+## Corpus
 
-Corpus: 3 finance/business PDFs, 599 pages (a French consulting deck, an English annual report, an English investor deck). `◆` = upper bound (gpt-5 built the reference the judge grades against — reported for context, not ranked).
+7 pages of French insurance / social-protection forms (born-digital, partially filled):
 
-| Rank | Vendor | Fair total (structure-aware) | Content recall | Structure gap | Cost (599pp) | Speed |
-|---:|---|---:|---:|---:|---:|---:|
-| 1 | **Gemini 3.5 Flash** | **89%** | 92% | −3 | $7.12 | 6.9 s/pg |
-| 2 | Gemini 3.1 Flash-Lite | 86% | 90% | −4 | **$1.12** | 4.4 s/pg |
-| 3 | LlamaParse (agentic) | 86% | 90% | −4 | paid | 1.3 s/pg |
-| 4 | Landing AI | 81% | 87% | −6 | paid | 16.6 s/pg |
-| 5 | PyMuPDF | 68% | 84% | **−16** | $0 usage¹ | **0.11 s/pg** |
-| 6 | Tesseract | 52% | 64% | −12 | $0 | 1.2 s/pg |
-| ◆ | gpt-5 (image) | 88% ◆ | 91% | −3 | $13.82 | 4.1 s/pg |
+| Doc | Pages | What it is |
+|---|---|---|
+| Unédic *attestation d'employeur* | 4 | Unemployment-insurance employer certificate (employee LAYOUNI Fadhel): employer + employee identity, employment dates, rupture motive, salary tables, checkbox/radio fields. |
+| MNH *demande d'aide sociale* | 3 | Health-mutual social-aid application (DRAFT): cover letter, instructions, checkbox-grid aid tables. |
 
-**Takeaways:** Gemini 3.5 Flash wins on capture at ~half gpt-5's cost; Flash-Lite is the value frontier (86% for $1.12). Structure-aware scoring sorts vendors into two classes — structure-preservers lose ≤6 pts vs raw content recall, the two pure-text-dump tools (PyMuPDF, Tesseract) lose 11–16. Speed runs *opposite* to quality (fastest tool is the weakest). See the report for the full per-category, per-document, cost, and speed breakdowns plus the four-way ground-truth validation.
+These are **hard**: the fill values sit in a scrambled, space-separated text layer (the NIR
+prints as `1 8 4 0 6 2 1 0 5 4 0 1 8`), value→label binding is visual, and checkbox state is
+visual-only. No rule-based parser can read them correctly.
 
-¹ PyMuPDF usage is free but it is **AGPL-3.0 / paid commercial** — not free for proprietary/SaaS use. Permissive text-layer alternatives: pdfplumber (MIT), pypdf (BSD). See `FINAL_REPORT.md` §6.
+## How the ground truth is built (vision, multi-source)
 
-## Reports
+Because the forms can't be read by rules, the key is built from **three independent vision
+sources and reconciled** (full method in [`ground_truth/GT_RECONCILIATION.md`](ground_truth/GT_RECONCILIATION.md)):
 
-| File | What it covers |
+1. **Gemini 3.5 Flash** with a form-aware schema (`field` label→value, `choice` label+state, `table`) — the structural backbone.
+2. **The PDF text layer**, declared authoritative for every printed character/number; every field value is re-grounded against it.
+3. **Claude high-res vision** adjudicates the vision-only calls — every one of the 15 checked boxes was confirmed against a high-res crop. Landing AI cross-checks prose/tables.
+
+Gemini (and lightly Landing AI) co-author the key, so their scores against it are an **upper
+bound** (`◆`, not ranked). Cleanly graded vendors: **gpt-5, Mistral OCR 4, LiteParse, LlamaParse, PyMuPDF, Tesseract**.
+
+## The two metrics
+
+- **Objective dims** (`scripts/score_extraction.py`, free, deterministic): content / numeric
+  recall, precision, reading-order τ, table-presence — scored vs a text-layer∪OCR reference.
+  **Caveat:** this reference is text-derived, so a tool that simply dumps the text layer
+  (PyMuPDF) scores ~100% **even though it preserves no field bindings and no checkbox state**.
+  These dims measure "are the characters present," not "is the form readable."
+- **Structure-aware fair total** (`scripts/score_fair_total_structure.py`, LLM judge): the
+  headline. Credits a value only if a reader could recover *which field/row/column* it belongs
+  to and the *correct checkbox state*; penalises a wrong binding or a wrong tick as a
+  contradiction. This is the metric that separates structure-preservers from text-dumpers.
+
+## Status
+
+| Step | State |
 |---|---|
-| [`FINAL_REPORT.md`](FINAL_REPORT.md) | The full benchmark: headline, per-category, cost, speed, recommendations, caveats |
-| [`DESIGN.md`](DESIGN.md) | Methodology, bias controls, reproducibility |
-| [`STRUCTURE_AWARE_SCORING.md`](STRUCTURE_AWARE_SCORING.md) | The canonical metric: why/how scores require recoverable bindings |
-| [`GT_VALIDATION.md`](GT_VALIDATION.md) | Four-axis ground-truth validation (audit → correction → re-measure → cross-family judge) |
-| [`RECONCILIATION.md`](RECONCILIATION.md) | Reconciliation with a second, independent audit |
-| [`ENTERPRISE_EXTRACTION_PLAYBOOK.md`](ENTERPRISE_EXTRACTION_PLAYBOOK.md) | Practical routing/build guidance distilled from the results |
-| `AUDIT_*.md` | Measurement-artifact audits (judge-input cap, LlamaParse tier, PyMuPDF structure) |
-| `POC_DETERMINISTIC_SCORING.md` | Can a deterministic scorer replace the LLM judge? (partial) |
-| `results/*.md` | Per-vendor scorecards and the comparison tables behind the report |
+| Corpus discovery, render, objective reference | ✅ run (free) |
+| Ground truth (Gemini + text layer + Claude hi-res) | ✅ built & reconciled |
+| Vendors extracted: PyMuPDF, Tesseract, Gemini, Landing AI, gpt-5, LlamaParse, LiteParse, **Mistral OCR 4** | ✅ |
+| Mistral OCR 4 (advanced config) added as 8th vendor — full 5-pass re-judge + splice | ✅ 2026-06-23 ([`MISTRAL_ADD.md`](MISTRAL_ADD.md)) |
+| Objective scorecard | ✅ `results/_extraction_objective.json` |
+| Structure-aware fair-total judge (headline) | ✅ `results/FAIR_TOTAL.md` |
+| **Spatial-relationship ranking** (field/checkbox/cell binding — the form metric) | ✅ `results/SPATIAL_RANKING.md` |
+| Cross-family judge (Gemini) — self-preference check | ✅ `results/_fair_total_judging_gemini_v2.json` |
+| Landing AI on current **DPT-2** model (`v1/ade/parse`) — legacy endpoint config fixed | ✅ 2026-06-15 |
+| Ground truth re-verified against page renders (checkbox states + field values) | ✅ all 15 ticked boxes + key fields confirmed |
 
-## Repository layout
+**Headline (clean vendors): Mistral OCR 4 #1 at 92%, then gpt-5 (image) 80%, then LiteParse (56%)
+leading the local text-layer tools (PyMuPDF 49 / Tesseract 44, order within judge noise), LlamaParse
+last (31%).** Mistral OCR 4 (added 2026-06-23, [`MISTRAL_ADD.md`](MISTRAL_ADD.md)) is the standout:
+it preserves HTML tables and the checkbox glyphs, so its structure gap is just −1 and it reads forms
+near the ◆ Gemini ceiling — *the same tool that was 5th-of-10 and the fabrication outlier on the
+chart/finance corpus is the clean #1 here*, because forms have no charts for its annotation layer to
+hallucinate on (unsupported drops from 19% there to 8% here). PyMuPDF reads prose perfectly but craters
+on forms (loses ~23 pts to the binding check under the gpt-5 judge); the pure text-dumpers collapse
+exactly where field/checkbox structure lives. **LiteParse** (run-llama OSS, LlamaParse's core minus the
+VLM) keeps label↔value adjacency and the tick glyphs via its grid projection, making it the best
+*text-layer* tool on forms (the reverse of the finance corpus), though at the corpus-high 23%
+wrong-binding rate. `◆` GT co-authors (upper bound): Gemini 3.5 Flash 99%, Landing AI (DPT-2) 84%.
 
-```
-scripts/          extraction harness + scoring/judging pipeline (Python)
-results/*.md       scorecards and comparison tables
-*.md               the reports (above)
-.env.example       the API keys each script expects
-```
+**For forms, spatial relationship is what matters** ([`results/SPATIAL_RANKING.md`](results/SPATIAL_RANKING.md)):
+ranked on field→value / checkbox-state / table-cell binding alone, **Mistral OCR 4 tops both judges at
+97%** and gpt-5 (image) follows at **84%**, vs the text-layer tools at **30–39%** (LiteParse leads them
+at 39%). The decisive split is **checkbox state**, and it sorts the tools by *how each sees a tick*:
+**0%** for the parsers that read the text layer and flatten it (PyMuPDF, LlamaParse — the `[X]` glyph is
+there but detached); a noisy partial for the two that don't — Tesseract's pixel OCR (6–31%) and
+LiteParse's glyph-preserving grid (22–27%); and **85–100%** only for the vision models (Mistral reads
+the ☐/☒ glyph at **100%**). A tick is a near-visual fact; only vision reads it reliably. On forms, a
+vision model is not optional.
 
-## Data is not included
+**Validated with a second judge family:** a Gemini 3.5 Flash judge on the byte-identical rubric also
+ranks **Mistral OCR 4 #1 (98%) and gpt-5 (image) #2 (94%)** among clean vendors — the same order as
+the gpt-5 judge, so the headline is not self-preference. Absolute scores are judge-dependent (the
+Gemini judge grades higher across the board); the cross-judge spread is the real uncertainty band, and
+on this n=7 corpus the wide gaps are signal while few-point gaps are noise. Full read:
+[`FINDINGS.md`](FINDINGS.md).
 
-This repository ships the **code and findings only**. The three source PDFs, their full ground-truth transcriptions, the page-image renders, and the per-vendor reconstructions are **deliberately excluded** (`.gitignore`) because they reproduce the entire content of documents that are not cleared for public distribution. As a result the benchmark is **not runnable end-to-end from this repo as-is** — the scripts and methodology are published for inspection, reuse, and adaptation to your own corpus.
-
-To run it on your own PDFs: drop them in `Data/`, set up `.env` from `.env.example`, and follow the pipeline described in `DESIGN.md` (render → per-vendor extract → judge → score).
-
-## Reproducing on your own corpus
+## Run it
 
 ```bash
-cp .env.example .env        # fill in your keys
-# place your PDFs in Data/
-python3 scripts/build_gt_md_v2.py     # build the ground-truth reference
+cp .env.example .env                                   # VISION_AGENT / OPENAI / GEMINI / LLAMA keys
+python3 scripts/render_all.py                          # Data/*.pdf -> renders + manifest
+python3 scripts/build_reference.py                     # objective text-layer∪OCR reference (free)
+
+# vision GT sources
 python3 scripts/gemini_extract.py gemini-3.5-flash image
-python3 scripts/score_fair_total.py   # structure-aware judging
+python3 scripts/landingai_pass.py ground_truth/render_full ground_truth/landingai_full
+python3 scripts/build_gt_insurance.py                 # reconciled GT + answer key
+
+# vendors
+python3 scripts/collect_extractions.py pymupdf        # also: tesseract / gemini_flash / landingai
+.venv-liteparse/bin/python scripts/liteparse_run.py   # LiteParse (run-llama OSS, local/free)
+python3 scripts/collect_extractions.py liteparse
+MISTRAL_INPUT=png .venv-mistral/bin/python scripts/mistral_run.py   # Mistral OCR 4 (paid; advanced config)
+python3 scripts/collect_extractions.py mistral
+python3 scripts/openai_extract.py image               # gpt-5 (paid)
+python3 scripts/score_extraction.py pymupdf tesseract landingai gemini_flash   # objective
+python3 scripts/build_vendor_md.py                    # per-vendor docs for the judge
+python3 scripts/score_fair_total_structure.py         # structure-aware headline (paid, gpt-5 judge)
 ```
 
-See `DESIGN.md` for the full step list, the judge prompts, and the bias controls.
+Corpus discovery is automatic (`scripts/corpus.py`, case-insensitive `*.pdf`/`*.PDF`) — drop
+your own PDFs in `Data/` and the pipeline picks them up.
 
 ## License
 
-[MIT](LICENSE) © 2026 Victor Zhang. The reports describe results obtained against a private corpus; the numbers are properties of that corpus and the dated vendor model versions.
+[MIT](LICENSE) © 2026 Victor Zhang.

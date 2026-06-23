@@ -9,12 +9,10 @@ iterated without re-spending credits.
 """
 import os, sys, time, json, requests, certifi
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corpus import discover_pdfs
+
 BASE = "https://api.cloud.llamaindex.ai/api/v1/parsing"
-DOCS = {
-    "20190308_Projet_Alpha_Restitution": "Data/20190308_Projet_Alpha_Restitution.pdf",
-    "IAR_FY25_EN": "Data/IAR_FY25_EN.pdf",
-    "SOTER - Company Presentation - vFF": "Data/SOTER - Company Presentation - vFF.pdf",
-}
 
 
 def key():
@@ -29,7 +27,7 @@ def main():
     out_dir = "ground_truth/llamaparse/raw"
     os.makedirs(out_dir, exist_ok=True)
     summary = {}
-    for doc, path in DOCS.items():
+    for doc, path in discover_pdfs().items():
         raw_path = os.path.join(out_dir, doc + ".json")
         if os.path.exists(raw_path):
             data = json.load(open(raw_path))

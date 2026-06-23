@@ -5,8 +5,11 @@ Cap keeps images <2000px (Claude multi-image limit) and token-reasonable, while
 staying sharp enough for Landing AI table parsing. Writes ground_truth/render_full/
 and a _manifest.json listing every page.
 """
-import sys, os, glob, json
+import sys, os, json
 import fitz
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from corpus import discover_pdfs
 
 MAXDIM = 1600
 
@@ -18,8 +21,7 @@ def main():
     maxdim = int(sys.argv[4]) if len(sys.argv) > 4 else MAXDIM
     os.makedirs(out_dir, exist_ok=True)
     manifest = []
-    for pdf in sorted(glob.glob(os.path.join(data_dir, "*.pdf"))):
-        name = os.path.splitext(os.path.basename(pdf))[0]
+    for name, pdf in discover_pdfs(data_dir).items():
         doc = fitz.open(pdf)
         npages = doc.page_count
         for i in range(npages):

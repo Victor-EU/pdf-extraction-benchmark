@@ -12,12 +12,13 @@ analog of gpt-5 reasoning effort=low. Resumable per-page cache, threaded.
 Usage:  python3 scripts/gemini_extract.py <gemini-3.5-flash|gemini-3.1-flash-lite> [image|file] [workers]
 Output: results/_gemini_<slug>_extract.json  +  ground_truth/gemini_<slug>_extract/raw/
 """
-import os, sys, json, time, base64, glob, threading
+import os, sys, json, time, base64, threading
 from concurrent.futures import ThreadPoolExecutor
 import fitz, requests, certifi
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from openai_extract import PROMPT  # identical instruction text across vendors
+from corpus import discover_pdfs
 
 if os.path.exists(".env"):
     for _l in open(".env"):
@@ -35,17 +36,23 @@ _ITEM = {
     "type": "object",
     "properties": {
         "type": {"type": "string",
-                 "enum": ["text", "heading", "table", "figure", "marginalia", "other"]},
+                 "enum": ["text", "heading", "field", "choice", "table",
+                          "figure", "marginalia", "other"]},
         "position": {"type": "string",
                      "enum": ["top-left", "top-center", "top-right", "mid-left", "center",
                               "mid-right", "bottom-left", "bottom-center", "bottom-right",
                               "full-page"]},
-        "figure_kind": {"type": "string",
-                        "enum": ["none", "graph", "diagram", "photo", "logo"]},
+        "field_label": {"type": "string"},
+        "field_value": {"type": "string"},
+        "choice_label": {"type": "string"},
+        "choice_state": {"type": "string", "enum": ["checked", "unchecked", "none"]},
+        "figure_kind": {"type": "string", "enum": ["none", "photo", "logo"]},
         "content": {"type": "string"},
     },
-    "required": ["type", "position", "figure_kind", "content"],
-    "propertyOrdering": ["type", "position", "figure_kind", "content"],
+    "required": ["type", "position", "field_label", "field_value",
+                 "choice_label", "choice_state", "figure_kind", "content"],
+    "propertyOrdering": ["type", "position", "field_label", "field_value",
+                         "choice_label", "choice_state", "figure_kind", "content"],
 }
 SCHEMA = {
     "type": "object",
@@ -138,7 +145,7 @@ def main():
     os.makedirs("results", exist_ok=True)
 
     manifest = json.load(open(os.path.join(render, "_manifest.json")))
-    pdfs = {os.path.splitext(os.path.basename(p))[0]: p for p in glob.glob("Data/*.pdf")}
+    pdfs = discover_pdfs()
 
     def task(m):
         doc, page = m["doc"], m["page"]
