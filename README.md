@@ -12,8 +12,8 @@ omission — so structure and checkbox state are scored, not caveated.
 
 > This repo is a re-aiming of a prior chart/finance-document benchmark onto an **insurance-form
 > corpus**. The chart/diagram/graph machinery is retired; the new structure primitives are the
-> **form field** (label → value) and the **checkbox/radio state**. The prior reports are kept
-> under `archive/`.
+> **form field** (label → value) and the **checkbox/radio state**. The prior chart/finance reports
+> have been retired from the tree; they remain in the git history of the pre-insurance commits.
 
 ## Corpus
 

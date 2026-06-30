@@ -266,8 +266,8 @@ tick here is, at best, partial and unreliable.**
   corpus it captures 11 of the GT's 15 ticks — all 11 correct, 4 omitted. Its failure mode is
   **under-capture and the occasional wrong value, not wrong bindings** — which is exactly why the
   gpt-5 judge's harsh 70/40 on AE p1 is *justified*, not self-deprecation. (Hand audit:
-  `archive/` page crops; the NIR/DOB errors are the canonical "confident silent error on a PII
-  field" this benchmark warns about.)
+  local page crops, not published; the NIR/DOB errors are the canonical "confident silent error on a
+  PII field" this benchmark warns about.)
 - **Gemini 3.5 Flash reads these forms remarkably well** (and co-authored the GT): 22/22 field
   values on the densest page grounded in the text layer, and **15/15 checked boxes confirmed
   correct** at high res — including the single ticked box on the MNH demande grid that looks
