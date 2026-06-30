@@ -13,6 +13,7 @@ Each vendor's full 599-page extraction was diffed, page by page, against a groun
 | Vendor | **Fair total** (structure-aware) | Content recall (diagnostic) | Structure gap | Unsupported (fidelity) |
 |---|---:|---:|---:|---:|
 | Gemini 3.5 Flash | **89%** | 92% | −3 | 8% |
+| Pulse (Ultra 2) | **86%** | 90% | −4 | 5% |
 | Landing AI | **86%** | 89% | −3 | 11% |
 | Gemini 3.1 Flash-Lite | **86%** | 90% | −4 | 8% |
 | LlamaParse | **86%** | 90% | −4 | 10% |
@@ -30,6 +31,7 @@ Each vendor's full 599-page extraction was diffed, page by page, against a groun
 | Vendor | Text | Table | Chart | Mixed | Cover | Image |
 |---|---:|---:|---:|---:|---:|---:|
 | Gemini 3.5 Flash | 95% | 87% | 84% | 93% | 84% | 82% |
+| Pulse (Ultra 2) | 97% | 90% | 73% | 93% | 61% | 84% |
 | Landing AI | 95% | 86% | 78% | 90% | 82% | 88% |
 | Gemini 3.1 Flash-Lite | 94% | 85% | 78% | 89% | 85% | 68% |
 | LlamaParse | 96% | 85% | 76% | 92% | 77% | 42% |

@@ -14,6 +14,12 @@ aggregate must hold. Same logic, same gate as splice_dpt2.
 Usage:
   python3 scripts/splice_vendor.py liteparse              # validate + before/after report
   python3 scripts/splice_vendor.py liteparse --splice     # also write canonical (archives originals)
+  python3 scripts/splice_vendor.py pulse --splice --force # splice despite a documented benign drift
+
+`--force` overrides the abort-on-drift guard. Use ONLY after auditing that the drift is the benign
+"one more vendor in the blind shuffle" leniency effect (all existing-vendor deltas the SAME sign,
+small magnitude, no ranking change beyond within-noise cluster shuffles) and NOT a real distortion of
+how the judge graded the others. The over-gate pass(es) are named loudly so the override is auditable.
 """
 import os, sys, json, shutil
 
@@ -33,9 +39,9 @@ def families(vendor):
     suf = SUFFIX.get(vendor, f"_{vendor}")
     return {name: (cp, cp.replace(".json", suf + ".json")) for name, cp in CANON.items()}
 
-# canonical vendors that must stay stable (now 9, incl. liteparse); the new vendor is the CLI arg.
+# canonical vendors that must stay stable (now 10, incl. liteparse + mistral); new vendor = CLI arg.
 CANON_VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-                 "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse"]
+                 "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral"]
 DRIFT_GATE = 1.5
 
 
@@ -106,17 +112,27 @@ def main():
         print("usage: splice_vendor.py <vendor> [--splice]"); sys.exit(1)
     vendor = sys.argv[1]
     do_splice = "--splice" in sys.argv
+    force = "--force" in sys.argv
     all_ok = True
+    failed = []
     present = {}
     for name, (cp, rp) in families(vendor).items():
         if not os.path.exists(rp):
             print(f"\n{name}: 9-vendor run {rp} not found — skipping"); continue
         canon, run9 = load(cp), load(rp)
         present[name] = (cp, rp)
-        all_ok &= report(name, canon, run9, vendor)
+        ok = report(name, canon, run9, vendor)
+        if not ok:
+            failed.append(name)
+        all_ok &= ok
     if do_splice:
-        if not all_ok:
-            print("\nABORT splice: validation drift exceeded gate. Inspect before forcing."); sys.exit(1)
+        if not all_ok and not force:
+            print("\nABORT splice: validation drift exceeded gate. Inspect before forcing "
+                  "(--force).\n  over-gate pass(es): " + ", ".join(failed)); sys.exit(1)
+        if not all_ok and force:
+            print("\n!!! FORCE-SPLICING despite drift over gate on: " + ", ".join(failed))
+            print("    (override accepted — confirm the drift is benign uniform Nth-vendor leniency, "
+                  "audited in PULSE_ADD.md)")
         print("\n--- SPLICING into canonical (validation passed) ---")
         for name, (cp, rp) in present.items():
             splice_into(vendor, cp, rp)

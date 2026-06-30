@@ -132,7 +132,7 @@ The scoring evolved as earlier metrics were found to either **saturate** or **mi
 
 - **Objective recall**, scored against a **vendor-neutral reference** = (born-digital text-layer) ∪ (image-region OCR), *not* any vendor's output:
   - **Content-token recall**, **numeric/finance recall**, **table recovery**, **reading order** (Kendall-τ).
-- **Figure judging** — a **blind gpt-5 vision judge** grades against the *page image* (not against a vendor), all 10 extractions shuffled A–J:
+- **Figure judging** — a **blind gpt-5 vision judge** grades against the *page image* (not against a vendor), all 10 extractions shuffled A–J (Pulse is excluded from this structured figure judge — it emits no figure blocks; its figure reading is scored by the Chart category of the fair total instead; see [`PULSE_ADD.md`](PULSE_ADD.md)):
   - **graph-data fidelity** over the 123 graph pages, **diagram-structure fidelity** over the 97 diagram pages.
 
 > **The `table_recovery` correction (the original spark for this audit).** The first table metric scored Landing AI at **56%**, which looked wrong. Two bugs were found and fixed:
@@ -146,7 +146,7 @@ The scoring evolved as earlier metrics were found to either **saturate** or **mi
 ### Gen 3 — The fair total (the headline)
 `scripts/score_fair_total.py` + `scripts/fair_total_report.py`. A **document-level, paraphrase-tolerant, density-weighted** measure of *how much of the document's real information each vendor conveyed*.
 
-- **Unit of judgment:** the page. For each of the 599 pages, a **blind gpt-5 judge** sees the `GROUND_TRUTH.md` page plus **all 10 vendors' full page markdown, shuffled A–J**, and returns, per vendor:
+- **Unit of judgment:** the page. For each of the 599 pages, a **blind gpt-5 judge** sees the `GROUND_TRUTH.md` page plus **all 11 vendors' full page markdown, shuffled A–K**, and returns, per vendor:
   - `info_recall` (0–100): what fraction of the GT's substantive information (facts, numbers, table cells, **chart data values**, diagram nodes/relationships, labels) the extraction conveys. **Equivalent phrasing is credited as fully correct** — a chart described in different-but-correct words with the same numbers scores full marks. Information is rewarded, not verbosity or wording.
   - `unsupported` (0–100): the fidelity flag — what fraction of the extraction's claims **contradict** the GT or assert **wrong/invented** facts. *Crucially, this counts only genuine errors* — a fuller-but-consistent description is **not** penalized. (This definition was tightened after a v1 smoke test over-penalized Landing AI's verbose figure prose as "unsupported"; see §6.)
   - `page_info_weight` (1–10): how much real information the page holds (1 = a divider/title; 10 = a dense data table or multi-series chart).
@@ -167,7 +167,7 @@ This benchmark uses an LLM as both transcriber and judge, so it is built around 
 
 | Threat | Control |
 |---|---|
-| Judge favors a *recognizable* vendor | **Blind judging** — all extractions shuffled to letters A–J per page; the judge never learns whose is whose. |
+| Judge favors a *recognizable* vendor | **Blind judging** — all extractions shuffled to letters per page (A–K on the headline fair total, A–J on the figure judge); the judge never learns whose is whose. |
 | Judge grades against a vendor's style | **vs-image / vs-GT** — the figure judge grades against the *page image*; the fair-total judge against the *transcription*. Neither grades against a vendor output. |
 | Lexical overlap punishes correct paraphrase | **Paraphrase credited** — equivalent phrasing with the same facts/numbers scores full `info_recall`. |
 | Verbosity mistaken for error | **`unsupported` = contradictions only** — fuller-but-consistent descriptions are not penalized (tightened after a v1 smoke test flagged Landing AI's long figure prose; LA's `unsupported` dropped from 80→10 on re-validation, confirming the original flag was a verbosity artifact). |
@@ -232,7 +232,7 @@ Stated plainly, because a benchmark is only as honest as its caveats:
 | `ground_truth/RUBRIC.md` | locked 6-category rubric |
 | `ground_truth/reconcile/final_answer_key_v3.json` | Layer 1 — authoritative category key |
 | `ground_truth/GROUND_TRUTH.md` | Layer 2 — 599-page transcription reference |
-| `results/_extract_<vendor>.json` | normalized per-page extraction (10 vendors) |
+| `results/_extract_<vendor>.json` | normalized per-page extraction (11 vendors) |
 | `results/vendor_md/<vendor>.md` | each vendor's full reconstructed document |
 | `results/EXTRACTION_COMPARISON.md` | Gen-2 per-capability matrix |
 | `results/FAIR_TOTAL.md` | Gen-3 headline + per-category fair total |

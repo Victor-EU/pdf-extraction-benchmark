@@ -9,20 +9,20 @@ VEND_LABEL = {
     "gemini_flash": "Gemini 3.5 Flash", "gemini_flash_lite": "Gemini 3.1 Flash-Lite",
     "landingai": "Landing AI",
     "llamaparse": "LlamaParse", "pymupdf": "PyMuPDF", "tesseract": "Tesseract",
-    "liteparse": "LiteParse", "mistral": "Mistral OCR 4",
+    "liteparse": "LiteParse", "mistral": "Mistral OCR 4", "pulse": "Pulse (Ultra 2)",
 }
 ORDER = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-         "landingai", "llamaparse", "mistral", "pymupdf", "tesseract", "liteparse"]
+         "landingai", "llamaparse", "mistral", "pulse", "pymupdf", "tesseract", "liteparse"]
 # coordinate-grounding capability (does the vendor emit element positions?)
 COORDS = {"gpt5_image": "coarse", "gpt5_file": "coarse",
           "gemini_flash": "coarse", "gemini_flash_lite": "coarse", "landingai": "exact boxes",
           "llamaparse": "exact boxes", "pymupdf": "exact boxes", "tesseract": "word boxes",
-          "liteparse": "exact boxes", "mistral": "exact boxes"}
+          "liteparse": "exact boxes", "mistral": "exact boxes", "pulse": "exact boxes"}
 COST = {"gpt5_image": "$13.82", "gpt5_file": "$12.54",
         "gemini_flash": "$7.12", "gemini_flash_lite": "$1.12",
         "landingai": "paid", "llamaparse": "paid (agentic)",
         "pymupdf": "$0", "tesseract": "$0", "liteparse": "$0 (local)",
-        "mistral": "$5/1k pages"}
+        "mistral": "$5/1k pages", "pulse": "~10 cr/pg"}
 
 
 def pct(x):
@@ -121,6 +121,14 @@ def main():
       "markdown, scores its diagrams **83** (gpt-5) / **86** (Gemini) — see `results/ELEMENT_AUDIT.md`. "
       "Its graph-data score (77, up from 51 at the accurate tier) rises here because tabulated chart data "
       "lands in its tables. Read the element-level diagram number as the true figure capability.")
+    w("> **Pulse figure caveat (shows `–` above).** Pulse (Ultra 2) was added to the headline fair total "
+      "only, not this structured figure judge. In its advanced config Pulse does **not** emit per-figure "
+      "blocks — its `Images[]` are bare `[Image]` placeholders and it weaves chart/diagram understanding "
+      "**inline into the page markdown** (e.g. a SOTER chart's “50 billion connected devices / 26 billion / "
+      "15 years” came back as prose). The structure-aware fair total reads that full markdown, so Pulse's "
+      "figure reading is measured by its **Chart-category fair total = 73%** (above Mistral's 62, below "
+      "Gemini Flash's 84) — a real, no-fabrication figure score (see [`../PULSE_ADD.md`](../PULSE_ADD.md)). "
+      "Running this structured judge on its empty placeholders would manufacture a misleading ~0.")
     w("")
     w("## Content + numeric recall by category (objective)")
     w("")

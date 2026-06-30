@@ -12,7 +12,7 @@ Usage:  python3 scripts/build_vendor_md.py            # all vendors
 import os, json
 
 VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-           "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral"]
+           "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral", "pulse"]
 
 
 def page_md(rec):

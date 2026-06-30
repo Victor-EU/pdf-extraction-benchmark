@@ -37,6 +37,7 @@ VENDORS = [  # (key, display)  -- ranking-relevant order; gpt-5 flagged upper-bo
     ("llamaparse",        "LlamaParse (agentic)"),
     ("landingai",         "Landing AI"),
     ("mistral",           "Mistral OCR 4"),
+    ("pulse",             "Pulse (Ultra 2)"),
     ("pymupdf",           "PyMuPDF"),
     ("liteparse",         "LiteParse"),
     ("tesseract",         "Tesseract"),

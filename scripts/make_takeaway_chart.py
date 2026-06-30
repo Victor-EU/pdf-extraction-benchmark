@@ -2,7 +2,7 @@
 """The single takeaway graph: capture quality vs trustworthiness.
 Y = structure-aware fair total (how much correctly-bound info captured, gpt-5 judge, HEADLINE).
 X = unsupported rate (fabrication / how much it invents, gpt-5 judge) — LEFT is safer.
-All numbers verified against results/_fair_total_judging.json (2026-06-23)."""
+All numbers verified against results/_fair_total_judging.json (Pulse added 2026-06-30)."""
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -17,6 +17,7 @@ D = [
     ("LlamaParse (agentic)",  85.5, 10.2, "vision", "paid",   False, 13.0, 83.8, "left"),
     ("Gemini 3.1 Flash-Lite", 85.8,  7.8, "vision", "$1.12",  False,  2.9, 82.4, "left"),
     ("Mistral OCR 4",         80.0, 19.3, "vision", "~$3",    False, 16.2, 75.5, "left"),
+    ("Pulse (Ultra 2)",       86.1,  5.8, "vision", "paid",   False,  3.0, 89.8, "left"),
     ("PyMuPDF",               68.3,  5.4, "text",   "$0*",    False,  6.1, 68.3, "left"),
     ("LiteParse",             62.2,  8.2, "text",   "$0",     False,  9.0, 62.2, "left"),
     ("Tesseract",             51.8, 15.0, "text",   "$0",     False, 13.4, 51.8, "right"),
@@ -67,10 +68,10 @@ leg = [
 ]
 ax.legend(handles=leg, loc="lower right", fontsize=9.5, framealpha=0.96)
 
-cap = ("599 pages of real finance documents (annual report, consulting deck, M&A memo) · 10 tools · blind gpt-5 judge.   "
+cap = ("599 pages of real finance documents (annual report, consulting deck, M&A memo) · 11 tools · blind gpt-5 judge.   "
        "*PyMuPDF runs free but is AGPL-licensed (paid for commercial use).\n"
        "Takeaway: the cheap default (Gemini 3.5 Flash) is already in the safe corner; text-layer tools are free but lose structure; "
-       "Mistral reads charts but is pushed right by inventing what it can’t read.")
+       "Mistral reads charts but is pushed right by inventing what it can’t read — Pulse joins the cluster while fabricating the least of any vision tool.")
 fig.text(0.5, 0.008, cap, ha="center", fontsize=8.5, color="#444")
 fig.subplots_adjust(bottom=0.155, top=0.93, left=0.082, right=0.975)
 out = "results/TAKEAWAY_quality_vs_trust.png"

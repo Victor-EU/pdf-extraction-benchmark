@@ -280,6 +280,38 @@ def collect_mistral():
     return out
 
 
+def collect_pulse():
+    """Pulse / runpulse.com (advanced config: pulse-ultra-2 + refine + figure_processing.description)
+    raw per-page response -> vendor format. The top-level page `markdown` (tables already inlined,
+    accents/structure refined) is the single ordered block (-> ordered_full, like the LiteParse /
+    LlamaParse page-md path). Reduction lives in pulse_common.reduce_response, shared with the runner
+    so they cannot diverge; table cells join the numeric pool (finance values live there).
+
+    figures=[] DELIBERATELY: in this config Pulse does NOT emit structured per-figure descriptions —
+    its `bounding_boxes.Images[]` are bare `[Image]` placeholders, and the chart/diagram understanding
+    it produces is woven INLINE into the page markdown instead (verified on probe: a SOTER chart's
+    "50 billion connected devices / 26 billion / 15 years" data came back as markdown prose, not a
+    figure object). That inline figure reading IS scored — by the structure-aware fair total, which
+    reads the full markdown (so Pulse's Chart-category score is its faithful figure measure). The
+    separate structured figure eval reads only figures[]/tables[], so populating a fake figure here
+    (or running it on the empty placeholders) would MISREPRESENT Pulse; see PULSE_ADD.md."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import pulse_common as P
+    raw = "ground_truth/pulse/raw"
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        cp = os.path.join(raw, f"{doc}__p{page:04d}.json")
+        if not os.path.exists(cp):
+            print(f"  [skip] {doc} p{page}: no raw at {cp}", file=sys.stderr)
+            out.append(rec(doc, page)); continue
+        md, tables, figures = P.reduce_response(json.load(open(cp)))
+        extra_nums = "\n".join(tables)
+        out.append(rec(doc, page, text=md, tables=tables, figures=[],
+                       ordered=[md], extra_nums=extra_nums))
+    return out
+
+
 def _from_blocks(blocks):
     text_parts, tables, figures, ordered = [], [], [], []
     for b in blocks:
@@ -324,6 +356,7 @@ COLLECTORS = {
     "landingai_dpt2": collect_landingai_dpt2,
     "liteparse": collect_liteparse,
     "mistral": collect_mistral,
+    "pulse": collect_pulse,
     "gpt5_image": lambda: collect_gpt5("image"), "gpt5_file": lambda: collect_gpt5("file"),
     "gemini_flash": lambda: collect_gemini("gemini_flash"),
     "gemini_flash_lite": lambda: collect_gemini("gemini_flash_lite"),

@@ -17,6 +17,7 @@
 | Landing AI | 95% | 93% | 91% | **80%** | **82%** | 63% | exact boxes | paid |
 | LlamaParse | 97% | 95% | 99% | **77%** | **30%** | – | exact boxes | paid (agentic) |
 | Mistral OCR 4 | 96% | 94% | 94% | **59%** | **60%** | – | exact boxes | $5/1k pages |
+| Pulse (Ultra 2) | 97% | 96% | 94% | **–** | **–** | – | exact boxes | ~10 cr/pg |
 | PyMuPDF | 97% | 97% | 57% | **29%** | **29%** | 90% | exact boxes | $0 |
 | Tesseract | 88% | 72% | 0% | **24%** | **29%** | 68% | word boxes | $0 |
 | LiteParse | 96% | 95% | 81% | **12%** | **14%** | – | exact boxes | $0 (local) |
@@ -36,6 +37,7 @@
 | Landing AI | 80% | 82% | 80% |
 | LlamaParse | 76% | 80% | 77% |
 | Mistral OCR 4 | 62% | 50% | 59% |
+| Pulse (Ultra 2) | – | – | – |
 | PyMuPDF | 29% | 28% | 29% |
 | Tesseract | 24% | 24% | 24% |
 | LiteParse | 12% | 13% | 12% |
@@ -51,11 +53,13 @@
 | Landing AI | 83% | 79% | 82% |
 | LlamaParse | 35% | 17% | 30% |
 | Mistral OCR 4 | 65% | 48% | 60% |
+| Pulse (Ultra 2) | – | – | – |
 | PyMuPDF | 30% | 26% | 29% |
 | Tesseract | 30% | 26% | 29% |
 | LiteParse | 17% | 5% | 14% |
 
 > **LlamaParse diagram caveat.** This figure judge reads each vendor's *figure-typed* blocks; LlamaParse (agentic) delivers its diagram content as **inline markdown prose**, not figure blocks, so this metric under-counts it (~30 here). The element-level judge, which reads LlamaParse's full markdown, scores its diagrams **83** (gpt-5) / **86** (Gemini) — see `results/ELEMENT_AUDIT.md`. Its graph-data score (77, up from 51 at the accurate tier) rises here because tabulated chart data lands in its tables. Read the element-level diagram number as the true figure capability.
+> **Pulse figure caveat (shows `–` above).** Pulse (Ultra 2) was added to the headline fair total only, not this structured figure judge. In its advanced config Pulse does **not** emit per-figure blocks — its `Images[]` are bare `[Image]` placeholders and it weaves chart/diagram understanding **inline into the page markdown** (e.g. a SOTER chart's “50 billion connected devices / 26 billion / 15 years” came back as prose). The structure-aware fair total reads that full markdown, so Pulse's figure reading is measured by its **Chart-category fair total = 73%** (above Mistral's 62, below Gemini Flash's 84) — a real, no-fabrication figure score (see [`../PULSE_ADD.md`](../PULSE_ADD.md)). Running this structured judge on its empty placeholders would manufacture a misleading ~0.
 
 ## Content + numeric recall by category (objective)
 
@@ -70,6 +74,7 @@
 | Landing AI | 97% | 97% | 95% | 96% | 88% | 85% |
 | LlamaParse | 97% | 99% | 97% | 99% | 88% | 99% |
 | Mistral OCR 4 | 97% | 99% | 95% | 98% | 88% | 96% |
+| Pulse (Ultra 2) | 97% | 100% | 97% | 99% | 88% | 99% |
 | PyMuPDF | 96% | 100% | 99% | 99% | 84% | 99% |
 | Tesseract | 94% | 90% | 89% | 91% | 62% | 85% |
 | LiteParse | 97% | 96% | 98% | 97% | 80% | 98% |
@@ -85,6 +90,7 @@
 | Landing AI | 95% | 97% | 89% | 93% | 86% | 100% |
 | LlamaParse | 97% | 100% | 89% | 96% | 90% | 100% |
 | Mistral OCR 4 | 97% | 99% | 86% | 95% | 90% | 100% |
+| Pulse (Ultra 2) | 97% | 99% | 93% | 97% | 90% | 100% |
 | PyMuPDF | 96% | 100% | 99% | 98% | 90% | 100% |
 | Tesseract | 75% | 76% | 68% | 72% | 63% | 94% |
 | LiteParse | 97% | 97% | 97% | 96% | 73% | 100% |

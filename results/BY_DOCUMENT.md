@@ -76,6 +76,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 80 | 94 | 76 | **86** |
 | Landing AI | 81 | 93 | 78 | **86** |
 | Mistral OCR 4 | 75 | 91 | 64 | **80** |
+| Pulse (Ultra 2) | 81 | 93 | 77 | **86** |
 | PyMuPDF | 61 | 77 | 59 | **68** |
 | LiteParse | 55 | 72 | 51 | **62** |
 | Tesseract | 50 | 60 | 38 | **52** |
@@ -91,6 +92,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 93 | 98 | 92 | **95** |
 | Landing AI | 92 | 97 | 90 | **94** |
 | Mistral OCR 4 | 89 | 96 | 83 | **91** |
+| Pulse (Ultra 2) | 89 | 95 | 81 | **90** |
 | PyMuPDF | 65 | 72 | 62 | **68** |
 | LiteParse | 61 | 71 | 59 | **65** |
 | Tesseract | 62 | 76 | 54 | **67** |
@@ -115,6 +117,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 92 | 76 | 77 | 88 | 74 | 30 | **80** |
 | Landing AI | 91 | 78 | 75 | 88 | 88 | 95 | **81** |
 | Mistral OCR 4 | 92 | 79 | 57 | 85 | 42 | 95 | **75** |
+| Pulse (Ultra 2) | 94 | 84 | 69 | 92 | 42 | 95 | **81** |
 | PyMuPDF | 85 | 62 | 44 | 77 | 21 | 20 | **61** |
 | LiteParse | 78 | 55 | 38 | 73 | 22 | 55 | **55** |
 | Tesseract | 75 | 51 | 29 | 65 | 22 | 35 | **50** |
@@ -130,6 +133,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 96 | 94 | 87 | 94 | 84 | **94** |
 | Landing AI | 96 | 94 | 85 | 93 | 85 | **93** |
 | Mistral OCR 4 | 97 | 96 | 74 | 90 | 78 | **91** |
+| Pulse (Ultra 2) | 98 | 96 | 80 | 94 | 81 | **93** |
 | PyMuPDF | 79 | 81 | 63 | 80 | 77 | **77** |
 | LiteParse | 87 | 64 | 47 | 71 | 77 | **72** |
 | Tesseract | 79 | 50 | 39 | 57 | 43 | **60** |
@@ -145,6 +149,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 96 | 86 | 72 | 87 | 63 | 90 | **76** |
 | Landing AI | 93 | 84 | 76 | 83 | 69 | 60 | **78** |
 | Mistral OCR 4 | 98 | 72 | 59 | 77 | 41 | 50 | **64** |
+| Pulse (Ultra 2) | 95 | 95 | 73 | 90 | 34 | 40 | **77** |
 | PyMuPDF | 79 | 68 | 54 | 76 | 23 | 60 | **59** |
 | LiteParse | 81 | 63 | 46 | 68 | 17 | 50 | **51** |
 | Tesseract | 79 | 44 | 32 | 56 | 12 | 45 | **38** |
@@ -163,6 +168,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 95 | 91 | 94 | 96 | 89 | 90 | **93** |
 | Landing AI | 95 | 89 | 93 | 94 | 97 | 95 | **92** |
 | Mistral OCR 4 | 95 | 92 | 80 | 94 | 64 | 98 | **89** |
+| Pulse (Ultra 2) | 95 | 95 | 76 | 95 | 60 | 85 | **89** |
 | PyMuPDF | 84 | 65 | 51 | 76 | 38 | 70 | **65** |
 | LiteParse | 83 | 60 | 45 | 74 | 38 | 80 | **61** |
 | Tesseract | 79 | 64 | 45 | 75 | 42 | 65 | **62** |
@@ -178,6 +184,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 98 | 98 | 96 | 99 | 89 | **98** |
 | Landing AI | 99 | 97 | 94 | 97 | 92 | **97** |
 | Mistral OCR 4 | 98 | 97 | 91 | 96 | 90 | **96** |
+| Pulse (Ultra 2) | 98 | 99 | 85 | 95 | 83 | **95** |
 | PyMuPDF | 75 | 68 | 66 | 74 | 82 | **72** |
 | LiteParse | 87 | 54 | 57 | 71 | 78 | **71** |
 | Tesseract | 89 | 75 | 58 | 73 | 55 | **76** |
@@ -193,6 +200,7 @@ above. See [`../LITEPARSE_ADD.md`](../LITEPARSE_ADD.md).
 | LlamaParse (agentic) | 99 | 93 | 90 | 95 | 89 | 95 | **92** |
 | Landing AI | 95 | 91 | 89 | 91 | 89 | 90 | **90** |
 | Mistral OCR 4 | 97 | 85 | 81 | 89 | 72 | 70 | **83** |
+| Pulse (Ultra 2) | 95 | 97 | 78 | 84 | 51 | 45 | **81** |
 | PyMuPDF | 78 | 63 | 59 | 73 | 46 | 60 | **62** |
 | LiteParse | 82 | 74 | 54 | 71 | 34 | 35 | **59** |
 | Tesseract | 86 | 64 | 48 | 66 | 30 | 55 | **54** |

@@ -1,16 +1,16 @@
 # Document extraction across finance and insurance — one CIO takeaway
 
 *Synthesis of two sibling structure-aware benchmarks: this **finance** corpus (599 pages of
-chart/figure-dense annual reports, consulting decks and M&A memos, 10 tools — see `README.md` /
+chart/figure-dense annual reports, consulting decks and M&A memos, 11 tools — see `README.md` /
 `FINAL_REPORT.md`) and an **insurance-forms** corpus (dense, partially-filled French insurance /
-social-aid forms, 8 tools). Both score the same way — not "how many characters did it recover" but
+social-aid forms, 9 tools). Both score the same way — not "how many characters did it recover" but
 "is each value still bound to the right place": the right row/column/series in finance, the right
 field and checkbox state on forms.*
 
 ## The headline you can't unsee
 
 **The same tool was the near-worst extractor on one corpus and the best on the other.** Mistral OCR
-4 finished **5th of 10 on finance with the highest fabrication rate of any tool (19% of its output
+4 finished **6th of 11 on finance with the highest fabrication rate of any tool (19% of its output
 unsupported** — it invented chart values and even a fake flowchart on graphics it couldn't read).
 On insurance forms the *identical* tool, *identical* config, was the **clean #1 at 92%, reading
 checkbox state at 100%**, with fabrication down to 8%. Nothing about the model changed — only the
@@ -20,12 +20,19 @@ That single fact disproves the question most extraction RFPs are built around. *
 PDF extractor." There is only the best extractor *for a document type*, and it changes between
 document types you already own.**
 
+There is a quieter, complementary lesson in the same data. The hosted parser added right after Mistral
+— **Pulse (Ultra 2)** — did *not* swing: it was a clean, low-fabrication vision reader on **both**
+corpora (86% / 5% unsupported on finance — the *lowest* fabrication of any vision tool there; clean #2
+at 90% on insurance). So genre doesn't just reshuffle the leaderboard — it also separates the tools
+whose *fidelity* is stable from the ones whose accuracy is a coin-flip by document type. That stability,
+not a single leaderboard rank, is what you actually want to procure for.
+
 ## Why the winner flips: two genres, two different hard problems
 
 | | **Finance documents** (reports, decks, memos) | **Insurance forms** (applications, attestations, claims) |
 |---|---|---|
 | The bottleneck | Reading **graphics** — charts, diagrams, dense multi-column tables | **Spatial binding** — value↔field, and *which box is ticked* |
-| Who won | **Gemini 3.5 Flash** (89%); a tight pack of vision parsers at 86% | **Mistral OCR 4** (92%); GPT-5 second (80%) |
+| Who won | **Gemini 3.5 Flash** (89%); a five-way pack of vision parsers at 86% incl. **Pulse**, the cleanest (5% fabrication) | **Mistral OCR 4** (92%); GPT-5 second (80%); Pulse clean #2 (90%) |
 | Who failed | Text-layer dumpers crater (PyMuPDF 68, Tesseract 52) — they recover characters but lose chart data and table structure | Same dumpers crater harder (30–56%) — and score **0% on checkbox state**: the tick is in the text stream but detached from its option |
 | The trap | **Fabrication** — a model that can't read a chart may invent plausible numbers (Mistral's 19%) | **Silent misreads** — a national-ID or date-of-birth read confidently wrong; a blank box reported as ticked |
 
