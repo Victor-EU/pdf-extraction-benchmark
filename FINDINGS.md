@@ -10,15 +10,25 @@ but "did it preserve the **spatial relationships** that give a form meaning" —
 its field label, each tick to its option, each cell to its row×column. Ranked on that, and nothing
 else ([`results/SPATIAL_RANKING.md`](results/SPATIAL_RANKING.md), both judge families):
 
-- **A vision model is required.** **Mistral OCR 4 is the clean #1 at 97% spatial fidelity** and gpt-5
-  (image) follows at **84%**; the four text-layer / OCR tools (LiteParse, PyMuPDF, LlamaParse,
-  Tesseract) sit at **30–39%**. The gap holds identically under a second (Gemini) judge.
+- **A vision model is required.** **Mistral OCR 4 is the clean #1 at 97% spatial fidelity**, **Pulse
+  (Ultra 2) is #2 at 94%** (gpt-5 judge) / 86% (Gemini), and gpt-5 (image) follows at **84%**; the four
+  text-layer / OCR tools (LiteParse, PyMuPDF, LlamaParse, Tesseract) sit at **30–39%**. The vision-vs-
+  text-layer gap holds identically under a second (Gemini) judge. Pulse reads **checkbox state at 94%**
+  on both judges — vision tier — and posts the **best cell binding of any vendor under the gpt-5 judge
+  (96%)** (added 2026-06-30, [`PULSE_ADD.md`](PULSE_ADD.md)).
 - **The same tool that lost the finance benchmark wins this one — genre decides.** Mistral OCR 4
   (added 2026-06-23, [`MISTRAL_ADD.md`](MISTRAL_ADD.md)) was **5th of 10 and the fabrication outlier
   (19% unsupported)** on the sibling chart/finance corpus, and is the **clean #1 here (92%
   structure-aware, 8% unsupported, structure gap −1)**. Forms have no charts for its annotation layer
   to hallucinate on (its finance weakness disappears), and reward exactly its strengths — dense
   multilingual OCR, HTML tables that survive a binding check, and checkbox glyphs read at **100%**.
+- **A second vision-tier vendor (Pulse) corroborates the pattern and sets the fidelity floor.** Pulse
+  (Ultra 2, runpulse.com on `pulse-ultra-2` + `refine`) lands clean **#2 at 90% structure-aware** — and
+  with the **lowest unsupported of any real vendor (4% gpt-5 / 1.6% Gemini, +1 gap)**: it almost never
+  asserts a binding it can't support. It trails Mistral by ~2pp of capture and is markedly slower
+  (`refine` ~30–150s/page vs ~2s) — a quality-for-latency trade. Its one soft spot is dense-table cell
+  binding under the stricter Gemini judge (65% on the single MNH household-table page). Two independent
+  vision vendors now top this corpus; the text-layer collapse on forms is not a one-tool artifact.
   This finance-vs-insurance flip is the single sharpest evidence in either repo that *the right
   extractor is a property of the document, not the tool in the abstract.*
 - **Checkbox state is the decider — and the text layer barely carries it.** *Which box is ticked* —

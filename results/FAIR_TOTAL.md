@@ -13,6 +13,7 @@ Each vendor's full 7-page extraction was diffed, page by page, against a ground-
 | Vendor | **Fair total** (structure-aware) | Content recall (diagnostic) | Structure gap | Unsupported (fidelity) |
 |---|---:|---:|---:|---:|
 | Mistral OCR 4 | **92%** | 94% | −1 | 8% |
+| Pulse (Ultra 2) | **90%** | 89% | +1 | 4% |
 | gpt-5 (image) | **80%** | 79% | +1 | 11% |
 | LiteParse | **56%** | 76% | −20 | 23% |
 | PyMuPDF | **49%** | 71% | −23 | 7% |
@@ -28,6 +29,7 @@ Each vendor's full 7-page extraction was diffed, page by page, against a ground-
 | Vendor | Text | Form | Table | Mixed |
 |---|---:|---:|---:|---:|
 | Mistral OCR 4 | 90% | 91% | 98% | 92% |
+| Pulse (Ultra 2) | 97% | 89% | 95% | 88% |
 | gpt-5 (image) | 97% | 65% | 100% | 88% |
 | LiteParse | 95% | 51% | 55% | 50% |
 | PyMuPDF | 99% | 29% | 35% | 66% |

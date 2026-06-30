@@ -48,7 +48,7 @@ FAMILIES = [
 ]
 # existing (already-canonical) vendors whose aggregate must stay stable; the new VENDOR is excluded
 CANON_VENDORS = [v for v in
-                 ["gpt5_image", "gemini_flash", "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse"]
+                 ["gpt5_image", "gemini_flash", "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral"]
                  if v != VENDOR]
 DRIFT_GATE = 10.0  # loose gross-distortion guard appropriate to n=7 (see module docstring)
 SPW = {"field_value_binding": 1.0, "checkbox_state": 1.0, "table_cell_binding": 0.8}

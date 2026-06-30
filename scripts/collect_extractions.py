@@ -313,6 +313,31 @@ def collect_mistral():
     return out
 
 
+def collect_pulse():
+    """Pulse (runpulse.com, advanced config: pulse-ultra-2 + refine + figure extraction) raw
+    per-page response -> vendor format. The top-level page markdown (tables already inline, checkbox
+    glyphs preserved in reading order) is the single ordered block (-> ordered_full, like the
+    LlamaParse page-md / LiteParse / Mistral path); each annotated image becomes a figure
+    {kind, content}. Reduction lives in pulse_common.reduce_response, shared with the runner so they
+    cannot diverge. Reconstructed table-cell text + figure descriptions join the numeric pool."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import pulse_common as P
+    raw = "ground_truth/pulse/raw"
+    out = []
+    for m in manifest():
+        doc, page = m["doc"], m["page"]
+        cp = os.path.join(raw, f"{doc}__p{page:04d}.json")
+        if not os.path.exists(cp):
+            print(f"  [skip] {doc} p{page}: no raw at {cp}", file=sys.stderr)
+            out.append(rec(doc, page)); continue
+        resp = json.load(open(cp))
+        md, tables, figures = P.reduce_response(resp)
+        extra_nums = "\n".join(tables) + "\n" + "\n".join(f["content"] for f in figures)
+        out.append(rec(doc, page, text=md, tables=tables, figures=figures,
+                       ordered=[md], extra_nums=extra_nums))
+    return out
+
+
 def collect_gpt5(mode):
     data = json.load(open(f"results/_openai_{mode}_extract.json"))
     out = []
@@ -343,6 +368,7 @@ COLLECTORS = {
     "landingai_dpt2": collect_landingai_dpt2,
     "liteparse": collect_liteparse,
     "mistral": collect_mistral,
+    "pulse": collect_pulse,
     "gpt5_image": lambda: collect_gpt5("image"), "gpt5_file": lambda: collect_gpt5("file"),
     "gemini_flash": lambda: collect_gemini("gemini_flash"),
     "gemini_flash_lite": lambda: collect_gemini("gemini_flash_lite"),

@@ -18,7 +18,7 @@ import os, json
 # tesseract — works without the paid vendors having been run. Override with the
 # VENDORS env var (comma-separated) to pin an explicit set.
 ALL_VENDORS = ["gpt5_image", "gpt5_file", "gemini_flash", "gemini_flash_lite",
-               "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral"]
+               "landingai", "llamaparse", "pymupdf", "tesseract", "liteparse", "mistral", "pulse"]
 
 
 def available_vendors():

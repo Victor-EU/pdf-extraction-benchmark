@@ -10,10 +10,10 @@ VEND_LABEL = {
     "gemini_flash": "Gemini 3.5 Flash ◆", "gemini_flash_lite": "Gemini 3.1 Flash-Lite ◆",
     "landingai": "Landing AI ◆", "llamaparse": "LlamaParse",
     "pymupdf": "PyMuPDF", "tesseract": "Tesseract", "liteparse": "LiteParse",
-    "mistral": "Mistral OCR 4",
+    "mistral": "Mistral OCR 4", "pulse": "Pulse (Ultra 2)",
 }
 ORDER = ["gpt5_image", "gemini_flash", "landingai", "llamaparse",
-         "gpt5_file", "gemini_flash_lite", "pymupdf", "tesseract", "liteparse", "mistral"]
+         "gpt5_file", "gemini_flash_lite", "pymupdf", "tesseract", "liteparse", "mistral", "pulse"]
 # Gemini (+ Landing AI) co-authored the insurance GT — upper bound, not ranked.
 REF = {"gemini_flash", "gemini_flash_lite", "landingai"}
 

@@ -15,7 +15,7 @@ LABEL = {"gpt5_image": "gpt-5 (image)", "gpt5_file": "gpt-5 (file)",
          "gemini_flash": "Gemini 3.5 Flash", "gemini_flash_lite": "Gemini Flash-Lite",
          "landingai": "Landing AI (DPT-2)", "llamaparse": "LlamaParse",
          "pymupdf": "PyMuPDF", "tesseract": "Tesseract", "liteparse": "LiteParse",
-         "mistral": "Mistral OCR 4"}
+         "mistral": "Mistral OCR 4", "pulse": "Pulse (Ultra 2)"}
 FAM = {"gpt-5": "results/_spatial_judging.json", "Gemini": "results/_spatial_judging_gemini.json"}
 
 

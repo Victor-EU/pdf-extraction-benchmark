@@ -67,13 +67,17 @@ bound** (`◆`, not ranked). Cleanly graded vendors: **gpt-5, Mistral OCR 4, Lit
 | Landing AI on current **DPT-2** model (`v1/ade/parse`) — legacy endpoint config fixed | ✅ 2026-06-15 |
 | Ground truth re-verified against page renders (checkbox states + field values) | ✅ all 15 ticked boxes + key fields confirmed |
 
-**Headline (clean vendors): Mistral OCR 4 #1 at 92%, then gpt-5 (image) 80%, then LiteParse (56%)
-leading the local text-layer tools (PyMuPDF 49 / Tesseract 44, order within judge noise), LlamaParse
-last (31%).** Mistral OCR 4 (added 2026-06-23, [`MISTRAL_ADD.md`](MISTRAL_ADD.md)) is the standout:
-it preserves HTML tables and the checkbox glyphs, so its structure gap is just −1 and it reads forms
-near the ◆ Gemini ceiling — *the same tool that was 5th-of-10 and the fabrication outlier on the
-chart/finance corpus is the clean #1 here*, because forms have no charts for its annotation layer to
-hallucinate on (unsupported drops from 19% there to 8% here). PyMuPDF reads prose perfectly but craters
+**Headline (clean vendors): Mistral OCR 4 #1 at 92%, Pulse (Ultra 2) #2 at 90%, then gpt-5 (image)
+80%, then LiteParse (56%) leading the local text-layer tools (PyMuPDF 49 / Tesseract 44, order within
+judge noise), LlamaParse last (31%).** Mistral OCR 4 (added 2026-06-23, [`MISTRAL_ADD.md`](MISTRAL_ADD.md))
+is the standout: it preserves HTML tables and the checkbox glyphs, so its structure gap is just −1 and it
+reads forms near the ◆ Gemini ceiling — *the same tool that was 5th-of-10 and the fabrication outlier on
+the chart/finance corpus is the clean #1 here*, because forms have no charts for its annotation layer to
+hallucinate on (unsupported drops from 19% there to 8% here). **Pulse (Ultra 2)** (added 2026-06-30,
+[`PULSE_ADD.md`](PULSE_ADD.md); runpulse.com on `pulse-ultra-2` + `refine`) is the clean **#2** — a true
+vision-tier reader (checkbox state 94%, #2 on both spatial judges) that captures ~2pp less than Mistral
+but **fabricates the least of any vendor (4% unsupported, +1 structure gap)** and is strongest on the
+scanned document (92%); its cost is latency, `refine` running ~30–150s/page (~10× Mistral). PyMuPDF reads prose perfectly but craters
 on forms (loses ~23 pts to the binding check under the gpt-5 judge); the pure text-dumpers collapse
 exactly where field/checkbox structure lives. **LiteParse** (run-llama OSS, LlamaParse's core minus the
 VLM) keeps label↔value adjacency and the tick glyphs via its grid projection, making it the best
