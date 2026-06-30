@@ -27,7 +27,10 @@ code," "what's the date of birth" — that gap is the whole risk.
   optional** — and most of insurance's hardest documents are checkbox-and-field forms.
 
 - **The best tool here was not the obvious one — and that's the durable lesson.** Mistral OCR 4 was
-  the clean #1 (92% structure-aware, checkbox 100%), ahead of GPT-5 (80%). But *the same Mistral was
+  the clean #1 (92% structure-aware, checkbox 100%), ahead of GPT-5 (80%). A second doc-AI vendor,
+  Pulse (Ultra 2), landed right behind at 90% and fabricated the *least* of any tool — so this isn't
+  one lucky brand: two independent vision engines top the list, and the dividing line is vision-vs-
+  text, not vendor. But *the same Mistral was
   5th-of-10 and the worst hallucinator* on our sibling finance/chart benchmark. Forms reward its
   strengths (dense text, table structure, reading ticks) and remove its weakness (no charts to
   invent on). **The right extractor is a property of the document type, not the tool.** Whatever

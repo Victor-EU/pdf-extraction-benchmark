@@ -40,6 +40,7 @@ vendors (each -> results/_extract_<vendor>.json via collect_extractions.py)
   ├─ pymupdf, tesseract               local/free
   ├─ liteparse_run.py                 LiteParse (run-llama OSS, local/free; PDFium + grid projection)
   ├─ mistral_run.py                   Mistral OCR 4 (advanced: ocr-4-0 + html tables + bbox annotation)
+  ├─ pulse_run.py                     Pulse / runpulse.com (advanced: pulse-ultra-2 + refine + figure desc)
   ├─ gemini_extract.py, openai_extract.py   form-aware schema (field/choice/table)
   ├─ landingai_pass.py, llamaparse_fetch*.py
   └─ build_vendor_md.py               -> results/vendor_md/<vendor>.md (judge input; VENDORS auto-detected)

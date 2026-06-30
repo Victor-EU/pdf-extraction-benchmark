@@ -25,6 +25,7 @@ from matplotlib.lines import Line2D
 META = [
     ("gemini_flash", "Gemini 3.5 Flash ◆", "vision", True,  78, 101, "right"),
     ("mistral",      "Mistral OCR 4",      "vision", False, 80,  90, "right"),
+    ("pulse",        "Pulse (Ultra 2)",    "vision", False, 66,  95, "right"),
     ("landingai",    "Landing AI (DPT-2) ◆","vision", True, 72,  84, "right"),
     ("gpt5_image",   "gpt-5 (image)",      "vision", False, 64,  78, "right"),
     ("liteparse",    "LiteParse",          "text",   False, 30,  59, "left"),
@@ -103,7 +104,7 @@ leg = [
 ]
 ax.legend(handles=leg, loc="lower right", fontsize=9, framealpha=0.96)
 
-cap = ("7 pages of French insurance / social-aid forms · 8 tools · blind gpt-5 judge.   "
+cap = ("7 pages of French insurance / social-aid forms · 9 tools · blind gpt-5 judge.   "
        "◆ Gemini & Landing AI co-authored the ground truth (upper bound, not ranked).\n"
        "Takeaway: capture quality and checkbox-reading rise together, and there is NO middle ground — "
        "vision tools read ticks (85–100%), text-layer tools can't (0–22%) even when they recover every "

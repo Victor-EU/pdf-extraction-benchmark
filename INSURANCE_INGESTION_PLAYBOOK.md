@@ -53,7 +53,7 @@ layout bindings are near-invisible to the text layer** — the flattening text-l
 LlamaParse) scored **0% on checkbox state** under both judges, OCR barely better (Tesseract 6–31%),
 and even the best-structured text-layer tool (LiteParse, whose grid keeps the literal `[X]` glyph)
 only 22–27% and noisily, vs 85–100% for vision; only vision recovers it reliably. For production, lean on **doc-AI engines** (Azure
-Document Intelligence, AWS Textract, Google Doc AI, Landing AI ADE/DPT-2) for the structured layer
+Document Intelligence, AWS Textract, Google Doc AI, Landing AI ADE/DPT-2, Pulse/runpulse.com) for the structured layer
 rather than a bare LLM: they emit **geometry + per-field confidence + determinism**, and confidence is
 what powers your straight-through-processing decision. Use vision **LLMs** for the messy long tail and
 for understanding tasks (classify, summarize, semantic QA over medical narratives).

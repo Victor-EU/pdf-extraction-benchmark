@@ -12,7 +12,8 @@ tempting wrong conclusion from this benchmark, for two independent reasons:
 1. **The numbers don't say what they appear to.** Gemini scored 99% here, but Gemini
    *co-authored the ground truth* (marked `◆`, unranked) — its score is inflated by construction.
    The clean top-tier evidence is **Mistral OCR 4 at 92% (gpt-5 judge) / 98% (Gemini judge)**, then
-   **gpt-5 at 80% / 94%**. The honest read is not "Gemini wins" but "**a vision model is required, and
+   **Pulse (Ultra 2) at 90% / 93%** — the cleanest of all, fabricating the least of any vendor (4%
+   unsupported) — then **gpt-5 at 80% / 94%**. The honest read is not "Gemini wins" but "**a vision model is required, and
    several are strong.**" And which one leads is *genre-specific*: **Mistral OCR 4 was 5th-of-10 and
    the fabrication outlier on this repo's sibling chart/finance benchmark, yet is the clean #1 here**
    — the same tool, opposite verdict, because forms reward dense OCR + checkbox glyphs and have no
@@ -127,7 +128,7 @@ every element type. Genre-routing beats one-model-fits-all in both corpora.
 | Tier | Use for | Notes |
 |---|---|---|
 | **Text-layer** (pdfplumber MIT / pypdf BSD; LiteParse Apache-2.0) | Born-digital prose & simple text | Near-free, deterministic. **Disqualified for forms** — loses bindings + checkbox state. LiteParse (grid projection) is the best of them on forms (56% / 22–27% checkbox) but still a third of the vision tier and the noisiest (23% wrong bindings). |
-| **Vision LLM / OCR-4** (Mistral OCR 4, gpt-5, Gemini Flash) | Forms, checkboxes, complex tables | Clean top-tier evidence: Mistral OCR 4 (92%, clean #1 here) and gpt-5 (80%). Mistral's advanced OCR-4 config reads checkbox glyphs at 100% and preserves HTML tables — but it was the fabrication outlier on the finance corpus, so it is a *genre-specific* leader, not a universal one. Gemini Flash is an excellent *default vision tier* — cheap, fast, long-context — but its 99% here is unprovable (it co-authored the key). |
+| **Vision LLM / OCR-4 / doc-AI** (Mistral OCR 4, Pulse Ultra 2, gpt-5, Gemini Flash) | Forms, checkboxes, complex tables | Clean top-tier evidence: Mistral OCR 4 (92%, clean #1 here), **Pulse Ultra 2 (90%, clean #2 — a hosted doc-AI engine at runpulse.com; reads checkbox state 94% and fabricates the least of any vendor at 4%, the trade being ~30–150s/page latency)** and gpt-5 (80%). Mistral's advanced OCR-4 config reads checkbox glyphs at 100% and preserves HTML tables — but it was the fabrication outlier on the finance corpus, so it is a *genre-specific* leader, not a universal one. Gemini Flash is an excellent *default vision tier* — cheap, fast, long-context — but its 99% here is unprovable (it co-authored the key). |
 | **Document-AI** (Azure DI, Textract, Google Doc AI, Landing AI ADE **DPT-2**) | Anything needing geometry, confidence, audit trail, determinism | The right call for regulated / human-in-the-loop ingestion. Trades peak free-form accuracy for provenance + calibration. Landing AI's current DPT-2 model reads form fields/checkboxes well (94% checkbox here) *and* emits exact boxes — the one option that gives both. |
 | **OCR** (Tesseract, Apache-2.0) | Scanned input as a front-end to the above | Truly free; mangles dense grids on its own. |
 
@@ -154,7 +155,7 @@ This is a **sharp probe, not a procurement benchmark**:
   than the gpt-5 judge). Treat the single number "80%" as gpt-5-judge-specific; the cross-judge
   spread is the real uncertainty band.
 - **Ground-truth circularity:** Gemini (and lightly the *legacy* Landing AI) co-authored the key, so
-  their rows are upper bounds, not rankings. Only gpt-5, Mistral OCR 4, LiteParse, LlamaParse, PyMuPDF, Tesseract are
+  their rows are upper bounds, not rankings. Only gpt-5, Mistral OCR 4, Pulse (Ultra 2), LiteParse, LlamaParse, PyMuPDF, Tesseract are
   graded cleanly. (Landing AI is shown on its current DPT-2 model; it remains `◆` because the legacy LA
   contributed to the key.)
 

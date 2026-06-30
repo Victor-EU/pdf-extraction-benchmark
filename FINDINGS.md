@@ -309,6 +309,15 @@ tick here is, at best, partial and unreliable.**
   Still, even the new #1 fabricates on low-information pages — so the "winner fails silently" warning
   (above, for gpt-5's NIR/DOB misreads) generalizes: surface confidence scores and gate derived claims
   regardless of which vendor leads.
+- **Pulse (Ultra 2, advanced config — `pulse-ultra-2` + `refine` + figure descriptions)** is the clean
+  **#2 (90% structure-aware, 94% / 86% spatial gpt-5 / Gemini)** — a hosted doc-AI engine
+  (runpulse.com) that reads the checkbox glyphs (☐/☒) at **94%** and posts the **lowest unsupported of
+  any vendor (4% gpt-5 / 1.6% Gemini, +1 structure gap)**: it almost never asserts a binding it can't
+  support, and is strongest on the **scanned** Unédic attestation (92%). It captures ~2pp under Mistral
+  and is far slower (`refine` ~30–150s/page vs ~2s); its one soft spot is dense-table cell binding under
+  the stricter Gemini judge (65% on the single MNH household-table page). A second independent vision
+  engine at the top corroborates that the form/checkbox divide is vision-vs-text, not one tool — and it
+  is the cleanest of all on fidelity. Full method + the force-splice audit in [`PULSE_ADD.md`](PULSE_ADD.md).
 - **Checkbox state is the separator** here, as chart-data fidelity was in the original corpus:
   near-invisible to the text layer, it cleanly divides form-aware vision tools from the rest — with
   only two partial, unreliable non-vision routes to a tick (LiteParse's glyph-preserving grid 22–27%,
@@ -328,5 +337,9 @@ The **Mistral OCR 4 add** (2026-06-23, advanced config) added **~$0.87** — ~$0
 Document-AI tier) + ~$0.83 re-judging all 8 vendors 8-up (structure gpt-5 $0.18 + content $0.17 +
 structure Gemini $0.11 + spatial gpt-5 $0.24 + spatial Gemini $0.13); its column was spliced into
 canonical with the existing seven frozen.
+The **Pulse (Ultra 2) add** (2026-06-30, advanced config `pulse-ultra-2` + `refine`) added **~$0.90** in
+re-judging all 9 vendors 9-up (structure gpt-5 $0.20 + content $0.18 + structure Gemini $0.12 + spatial
+gpt-5 $0.26 + spatial Gemini $0.14) + ~70 Pulse credits parsing (~10/page × 7); its column was spliced
+into canonical with the existing eight frozen.
 
 _Numbers are from the dated vendor model versions on this 7-page private corpus._
