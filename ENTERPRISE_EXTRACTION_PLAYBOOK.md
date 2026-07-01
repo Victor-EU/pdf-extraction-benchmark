@@ -5,15 +5,15 @@
 > error. This sharpens the playbook's core point — character extraction ≠ usable structure. Headline
 > figures shift accordingly (PyMuPDF 84→68; the structure-preserving vendors move ≤6).
 
-**A solution-consultant playbook.** Date: 2026-06-13.
+**A solution-consultant playbook.** Date: 2026-06-13 · Updated: 2026-07-01 (11 approaches incl. Mistral OCR 4, Pulse).
 **Audience:** enterprise data, platform, and ML teams choosing how to extract structured data from PDFs at scale.
-**Evidence base:** the benchmark in this repo (8 extraction approaches, 599 pages, finance/business documents) — see [`FINAL_REPORT.md`](FINAL_REPORT.md), [`DESIGN.md`](DESIGN.md), and the measurement-integrity audit in [`AUDIT_VEND_CAP.md`](AUDIT_VEND_CAP.md). Scope caveat: the corpus is **born-digital finance/business** documents; the *structural* findings transfer broadly, the *exact vendor scores* do not.
+**Evidence base:** the benchmark in this repo (11 extraction approaches, 599 pages, finance/business documents) — see [`FINAL_REPORT.md`](FINAL_REPORT.md), [`DESIGN.md`](DESIGN.md), and the measurement-integrity audit in [`AUDIT_VEND_CAP.md`](AUDIT_VEND_CAP.md). Scope caveat: the corpus is **born-digital finance/business** documents; the *structural* findings transfer broadly, the *exact vendor scores* do not.
 
 ---
 
 ## The thesis
 
-**Don't start by picking a vendor. Start by segmenting your documents, then match a *tool class* to each segment — and architect a cheap router, not a single golden parser.** The most common enterprise mistake is treating "PDF extraction" as one procurement decision with one winner. This benchmark showed the #1 vendor *flips with document mix*, and a single measurement bug moved a vendor 13 points. Ranking is content-dependent; treat it that way.
+**Don't start by picking a vendor. Start by segmenting your documents, then match a *tool class* to each segment — and architect a cheap router, not a single golden parser.** The most common enterprise mistake is treating "PDF extraction" as one procurement decision with one winner. This benchmark showed two things about rankings: *within* the finance corpus one vendor (Gemini Flash) won every document genre, but the **size of the gaps** flipped with document mix — a ~1 pp band among structure-preservers on the annual report vs a ~47 pp field spread on the chart-heavy M&A memo — and *across* corpora the **#1 itself flips**: the vendor that placed 6th here (Mistral OCR 4) is clean #1 on the sibling insurance-forms benchmark. A single measurement bug also moved a vendor 13 points. Ranking is content-dependent; treat it that way.
 
 ---
 
@@ -24,7 +24,7 @@ Before evaluating anything, profile your corpus on three axes:
 | Axis | Why it dominates the decision |
 |---|---|
 | **Born-digital vs scanned/photographed** | The single biggest fork. Born-digital PDFs carry an exact text layer → free tools nail text & numbers. Scanned/photographed → that floor disappears; you *need* vision/OCR. This benchmark was 100% born-digital — its rankings do **not** transfer to scanned docs. |
-| **Text/table-heavy vs figure-heavy** | Plain text & born-digital tables are essentially solved by everyone (~95%+). **Charts and diagrams are the great separator** — *figure-reading* tools (vision LLMs, and document-AI parsers in their agentic/LVM tiers) score ~83–92%; *pure text-layer* tools (PyMuPDF, plain OCR) score ~45–50%. If your value is in figures, this is where money — and picking the right *tier* — buys quality. |
+| **Text/table-heavy vs figure-heavy** | Plain text is near-solved for every tool that has vision or a text layer (~95%+ content recall). **Tables are only solved by structure-preservers**: score bindings (which row/column a value belongs to) and the flat-dump tools fall away — structure-aware Table scores: Tesseract 50, LiteParse 60, PyMuPDF 71, vs 85–90 for the structure-preserving tier. **Charts and diagrams are the great separator** — on *diagrams*, figure-reading tools (vision LLMs, and document-AI parsers in their agentic/LVM tiers) score ~83–92% element-level while *pure text-layer* tools (PyMuPDF, plain OCR) score ~45–50%; on *charts*, text-layer tools can look decent element-level (PyMuPDF 83, by recovering data labels verbatim) but collapse to 54 (PyMuPDF) / 33 (Tesseract) once the binding must survive. If your value is in figures, this is where money — and picking the right *tier* — buys quality. |
 | **Fixed-template vs free-form** | Invoices/KYC/forms with stable layouts favor template / document-AI extractors with field-level confidence. Free-form reports/decks favor general vision or holistic parsers. |
 
 Most enterprises find their estate is 70–80% "born-digital, text/table-heavy, semi-structured" with a long tail of scanned and figure-heavy documents. **That distribution, not a leaderboard, dictates architecture.**
@@ -40,7 +40,7 @@ Most enterprises find their estate is 70–80% "born-digital, text/table-heavy, 
 | **Text-layer extractor** | pdfplumber (MIT), pypdf (BSD), **PyMuPDF (AGPL-3.0 ⚠)** | ~Perfect text+tables on born-digital, $0 *usage*, instant, **never invents** | Blind to figure geometry; returns nothing on scanned pages; **PyMuPDF is AGPL/commercial — not free for proprietary use (see License gate, Step 6)** | Born-digital bulk; the cheap first pass |
 | **OCR** | Tesseract (+ cloud OCR) | Reads rendered text with no text layer | Error-prone on **numbers** (finance risk); no structure | Scanned, no budget — a floor, not a finish |
 
-Within the vision class, this benchmark's corrected numbers (finance/business, born-digital) put **Gemini 3.5 Flash** as the best generalist-per-dollar, with GPT‑5 / Claude as a reference tier and **Gemini Flash-Lite** as the value option — but treat that as one evidence point, not gospel.
+Within the vision class, this benchmark's corrected numbers (finance/business, born-digital) put **Gemini 3.5 Flash** as the best generalist-per-dollar, with GPT‑5 as the ◆ reference tier and **Gemini Flash-Lite** as the value option — but treat that as one evidence point, not gospel. (Claude-class frontier models sit in the same tool class but were **not** benchmarked here — Claude's role in this repo was independent ground-truth auditor, never a contestant.)
 
 ---
 
@@ -49,7 +49,7 @@ Within the vision class, this benchmark's corrected numbers (finance/business, b
 The cost-and-quality-optimal pattern for a heterogeneous estate is almost never a single vendor:
 
 ```
-        ┌─ born-digital text/tables ──► text-layer parser (0% hallucination)
+        ┌─ born-digital text/tables ──► text-layer parser (doesn't invent; ~5% unsupported)
         │                               pdfplumber/pypdf = permissive; PyMuPDF = AGPL ⚠
 PDF ──► classify page ─┼─ figures / charts / diagrams ──► vision LLM (e.g. Gemini Flash)
         └─ scanned / no text layer ───► vision LLM or cloud Document-AI
@@ -59,7 +59,7 @@ PDF ──► classify page ─┼─ figures / charts / diagrams ──► visi
                                    human-in-the-loop review (with coordinates)
 ```
 
-- A cheap deterministic first pass handles the 70–80% that's born-digital text — at $0 and zero invention.
+- A cheap deterministic first pass handles the 70–80% that's born-digital text — at $0 and with the lowest measured unsupported rate (~5%, and those are mostly *stranded* values whose binding is lost in the flat dump, not inventions).
 - You pay the vision premium **only** on pages that need eyes (figures, scans, low confidence).
 - This typically cuts cost by an order of magnitude versus "send everything to an LLM" while *raising* quality on the hard pages.
 
@@ -69,7 +69,7 @@ PDF ──► classify page ─┼─ figures / charts / diagrams ──► visi
 
 For finance, legal, and regulated workflows this is the point most leaderboards miss:
 
-- **A parser that pads with confident-but-wrong numbers is more dangerous than one that omits.** Measure *hallucination / unsupported* as a separate axis from recall. In this benchmark the most "complete" parser also asserted the most unsupported content (~17%) — completeness and fidelity are different columns; read both.
+- **A parser that pads with confident-but-wrong numbers is more dangerous than one that omits.** Measure *hallucination / unsupported* as a separate axis from recall. In this benchmark the fabrication outlier is Mistral OCR 4 at **19% unsupported** — its advanced chart-annotation layer *invents* content on graphics it can't parse — while the previously highest-padding parser (Landing AI) is at 11% on its current DPT-2 model. Completeness and fidelity are different columns; read both.
 - **Coordinates = auditability.** If a human or auditor must trace an extracted figure back to the page, you need bounding boxes — which the LLM class doesn't provide. That alone can decide vision-LLM vs document-AI regardless of accuracy.
 - **Numbers are the crown jewels.** OCR mangles digits; even vision models *estimate* label-free chart values. Wherever a number drives a downstream decision, gate it: validation rules, cross-footing/arithmetic checks, dual-extraction agreement, or human review.
 
@@ -79,7 +79,7 @@ For finance, legal, and regulated workflows this is the point most leaderboards 
 
 The highest-leverage thing a data team can do, and the meta-lesson of building this benchmark:
 
-- **Leaderboards don't transfer.** The same vendor scored 94% on an annual report and ~79% on chart decks; "who's #1" inverted with corpus mix and with which vendors were in the race.
+- **Leaderboards don't transfer.** The same vendor scored 94% on an annual report and ~79% on chart decks. Within this finance corpus the winner was stable (Gemini Flash took all three genres) but the *gaps* weren't — vendors converge to ~1 pp on the annual report and spread ~47 pp on the chart-heavy memo; and on the sibling insurance-forms corpus "who's #1" genuinely inverted (Mistral OCR 4: 6th on finance, clean #1 on forms).
 - **Measurement is treacherous.** Building this benchmark surfaced a 6,000-char input cap that silently deflated the most verbose vendor by up to 13 points, a metric whose denominator punished correct abstention, and a ground truth that *itself* hallucinated chart numbers. If you don't audit your eval, your eval will lie to you.
 - **Benchmark each vendor's *most capable tier* — tier choice can dwarf vendor choice.** One parser scored 71% in its default/middle tier (it silently dropped whole pages) and **90%** — a different league, and a different rank — in its top "agentic" tier. Same product, same API, one parameter. Pin the tier/model explicitly, confirm it in the response metadata, and re-confirm when the vendor changes defaults. A "vendor is weak" conclusion drawn from the wrong tier is the most expensive eval mistake you can make.
 
@@ -110,7 +110,7 @@ Accuracy rankings are moot if a tool fails a hard constraint. Check these *first
 | If your documents are… | Start with | Why |
 |---|---|---|
 | Born-digital, text/table-heavy (reports, statements) | Text-layer parser (pdfplumber/pypdf = permissive; PyMuPDF only if AGPL-compliant or licensed), escalate exceptions | ~perfect text+tables, $0 usage, never invents — but check the license (Step 6) |
-| Figure / chart / diagram-heavy (decks, infographics) | Native-vision LLM, or a document-AI parser's agentic/LVM tier | figure-reading tools score ~83–92% vs ~45–50% for pure text-layer parsers |
+| Figure / chart / diagram-heavy (decks, infographics) | Native-vision LLM, or a document-AI parser's agentic/LVM tier | on diagrams, figure-reading tools score ~83–92% vs ~45–50% for pure text-layer parsers; on charts the text-layer tools read data labels (element-level 83) but keep only 54/33 once bindings must survive |
 | Scanned / photographed (no text layer) | Vision LLM or cloud Document-AI; OCR as floor | text-layer parsers return nothing |
 | Fixed-template forms (invoices, KYC) | Document-AI with field confidence | template + field-level scoring + provenance |
 | Compliance / audit / coordinates required | Document-AI (exact boxes) | LLMs don't emit bounding boxes |

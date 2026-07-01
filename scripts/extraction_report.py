@@ -119,7 +119,7 @@ def main():
       "LlamaParse (agentic) delivers its diagram content as **inline markdown prose**, not figure blocks, "
       "so this metric under-counts it (~30 here). The element-level judge, which reads LlamaParse's full "
       "markdown, scores its diagrams **83** (gpt-5) / **86** (Gemini) — see `results/ELEMENT_AUDIT.md`. "
-      "Its graph-data score (77, up from 51 at the accurate tier) rises here because tabulated chart data "
+      "Its graph-data score (77, up from ~44 at the accurate tier) rises here because tabulated chart data "
       "lands in its tables. Read the element-level diagram number as the true figure capability.")
     w("> **Pulse figure caveat (shows `–` above).** Pulse (Ultra 2) was added to the headline fair total "
       "only, not this structured figure judge. In its advanced config Pulse does **not** emit per-figure "

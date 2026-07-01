@@ -96,9 +96,9 @@ The methodological core of this benchmark is that it has **two independent groun
 
 ---
 
-## 4. The nine approaches under test
+## 4. The eleven approaches under test
 
-Three architectural families, nine configurations. Each produces a normalized per-page record (`scripts/collect_extractions.py` → `results/_extract_<vendor>.json`) and a full reconstructed document (`scripts/build_vendor_md.py` → `results/vendor_md/<vendor>.md`).
+Three architectural families, eleven configurations. Each produces a normalized per-page record (`scripts/collect_extractions.py` → `results/_extract_<vendor>.json`) and a full reconstructed document (`scripts/build_vendor_md.py` → `results/vendor_md/<vendor>.md`).
 
 | # | Vendor / config | Family | How it sees the page | Coordinates |
 |---|---|---|---|---|
@@ -111,12 +111,14 @@ Three architectural families, nine configurations. Each produces a normalized pe
 | 7 | **PyMuPDF** | Classical text-layer | Embedded text + `find_tables()` | **exact boxes** |
 | 8 | **Tesseract** | Classical OCR | Full-page OCR on rasterized pages | word boxes |
 | 9 | **LiteParse** (run-llama OSS) | Classical text-layer + spatial grid | PDFium text → anchor grid-projection → heuristic markdown (auto-OCR on sparse pages) | **exact boxes** |
+| 10 | **Mistral OCR 4** (`mistral-ocr-4-0` + Document-AI annotations, most advanced config) | Specialized doc parser (OCR + per-image VLM annotation) | Rendered PNG → markdown + figure-describing annotation layer (input A/B'd; PNG won — `MISTRAL_ADD.md`) | **exact boxes** |
+| 11 | **Pulse** (Ultra 2 + `refine` + figure description, most advanced config) | Specialized doc parser (OCR + `refine` re-OCR pass) | Rendered PNG per page → markdown, chart/diagram prose woven inline (`PULSE_ADD.md`) | **exact boxes** |
 
 **Controls baked into the line-up:**
 - **gpt-5 image vs file** isolates *render-PNG vs native-PDF* input for the same model.
 - **Gemini runs the byte-identical prompt + schema as gpt-5**, in image mode, so the gpt-5↔Gemini gap isolates *the model*, not the harness. (`thinkingLevel=minimal` ≈ gpt-5 `effort=low`.)
 - **PyMuPDF, LiteParse and Tesseract are the zero-*usage*-cost local floor** — the value question is "how much does paying buy you over a born-digital text dump / spatial-grid markdown / plain OCR?" (License: **Tesseract is Apache-2.0** and **LiteParse is Apache-2.0** — both truly free, including proprietary/SaaS; **PyMuPDF is AGPL-3.0 or a paid Artifex commercial license** — $0 to *run* but *not* free for proprietary/SaaS deployment, where pdfplumber (MIT) / pypdf (BSD) / LiteParse are the permissive equivalents. See `FINAL_REPORT.md` §6 note ¹.) **LiteParse is the open-sourced core of LlamaParse minus the VLM** — included to test whether its spatial "grid-projection" markdown beats a plain PyMuPDF text dump (it does on prose, *not* on structured finance data — see `LITEPARSE_ADD.md`).
-- **Landing AI and LlamaParse are the specialized parsers** — the ones that emit exact element coordinates, which no LLM does.
+- **Landing AI, LlamaParse, Mistral OCR 4 and Pulse are the specialized parsers** — the tier that emits exact element coordinates, which no LLM does. Mistral and Pulse (added 2026-06-23 / 2026-06-30) are each run in their most advanced documented config, per the tier lesson from the LlamaParse audit; they also bracket the fidelity axis — Mistral is the fabrication outlier (19% unsupported), Pulse the cleanest vision vendor (5%).
 
 ---
 

@@ -59,8 +59,10 @@ semantics. The character-recognition problem became a *component*, not the produ
 
 This is the entire thesis of our benchmark restated as a market trend. We measure not "are the
 characters present" but "**is each value still bound to the right place**" — the right row/column/series
-in finance, the right field and checkbox state on forms. Tesseract (pure OCR) finished **dead last in
-both corpora** (52% structure-aware on finance; last on forms, 0% on checkbox state) precisely because
+in finance, the right field and checkbox state on forms. Tesseract (pure OCR) finished **dead last on
+the finance corpus** (52% structure-aware) and second-last on forms (44% — above only LlamaParse's
+watermark collapse to 31%), reading checkbox *state* at just 6–31% depending on judge (the outright 0%
+on checkboxes belongs to the text-layer *flattening* tools, PyMuPDF and LlamaParse), precisely because
 it's still selling the old output shape. The market is migrating from *transcription* to *bound
 meaning*, and the tools that only transcribe are being left behind for anything structured.
 
@@ -91,7 +93,7 @@ structurally cannot.
 
 Here's the finding that reframes everything. On our finance corpus, the top capture score didn't go to
 a specialised document-AI product. It went to **Gemini Flash — a general multimodal LLM — at 89%,
-ahead of every specialised parser (all clustered at 86%).**
+ahead of the specialised-parser cluster at 86%** (Mistral, at 80, sits below that cluster).
 
 So *reading the document* is **not** the document-AI products' durable advantage. General frontier
 models match or beat them, and they get cheaper and better every quarter. What the specialised parsers
@@ -156,8 +158,9 @@ that a validation layer can gate the uncertain cases.
    nor Document AI for the text — a $0 library (PyMuPDF / pdfplumber) lifts it perfectly. Document AI's
    real territory is **scans, forms, tables, and figures** — not "all PDFs."
 3. **Fixed high-volume forms.** Template / positional extraction still beats a VLM on a *known* layout
-   (e.g. a specific ACORD form) — cheaper, deterministic, ~99% on known fields. The VLM's advantage is
-   the *non-standard long tail*, not the standardised core.
+   (e.g. a specific ACORD form) — cheaper, deterministic, and highly reliable on known fields (an
+   industry/vendor-claimed profile; we did not benchmark template extraction ourselves). The VLM's
+   advantage is the *non-standard long tail*, not the standardised core.
 
 ---
 

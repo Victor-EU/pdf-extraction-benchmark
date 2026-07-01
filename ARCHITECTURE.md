@@ -8,7 +8,7 @@ it reaches any consumer.
 ```
 ╔══════════════════ ENTERPRISE LOCAL DATA-EXTRACTION PLATFORM ══════════════════╗
 
-        ┌─ born-digital text/tables ──► text-layer parser (0% hallucination)
+        ┌─ born-digital text/tables ──► text-layer parser (doesn't invent; ~5% unsup.)
         │                               pdfplumber/pypdf = permissive; classic PDF SDK
 PDF ──► classify page ─┼─ figures / charts / diagrams ──► vision LLM (e.g. Gemini Flash)
         └─ scanned / no text layer ───► vision LLM or cloud Document-AI

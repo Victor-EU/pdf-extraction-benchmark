@@ -3,7 +3,8 @@
 > **⁂ Mistral OCR 4 (the 10th vendor, added 2026-06-23) is NOT in this element-level eval** — like
 > LiteParse and the DPT-2 re-bench, only the headline fair total + figure eval were run (the
 > 6,129-element re-judge was out of scope). Mistral OCR 4 (advanced config: `mistral-ocr-4-0` +
-> Document-AI bbox annotation) lands at **80% structure-aware — 5th among real vendors, vision tier**,
+> Document-AI bbox annotation) lands at **80% structure-aware — 6th among real vendors (behind Gemini
+> Flash, Landing AI, Flash-Lite, LlamaParse and Pulse), vision tier**,
 > a genuine figure reader (chart-data 59 / diagram 60) — **but with the highest unsupported rate of
 > any vendor (19%): its annotation layer fabricates on graphics it can't parse**. Full
 > characterization in [`../MISTRAL_ADD.md`](../MISTRAL_ADD.md). On this table it would show a strong

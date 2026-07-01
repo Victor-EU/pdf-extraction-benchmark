@@ -2,19 +2,22 @@
 
 *Synthesis of two sibling structure-aware benchmarks: this **finance** corpus (599 pages of
 chart/figure-dense annual reports, consulting decks and M&A memos, 11 tools — see `README.md` /
-`FINAL_REPORT.md`) and an **insurance-forms** corpus (dense, partially-filled French insurance /
-social-aid forms, 9 tools). Both score the same way — not "how many characters did it recover" but
+`FINAL_REPORT.md`) and an **insurance-forms** corpus (7 pages across two dense, partially-filled
+French insurance / social-aid forms, 9 tools — small by design, so only its wide gaps are read as
+signal). Both score the same way — not "how many characters did it recover" but
 "is each value still bound to the right place": the right row/column/series in finance, the right
 field and checkbox state on forms.*
 
 ## The headline you can't unsee
 
 **The same tool was the near-worst extractor on one corpus and the best on the other.** Mistral OCR
-4 finished **6th of 11 on finance with the highest fabrication rate of any tool (19% of its output
-unsupported** — it invented chart values and even a fake flowchart on graphics it couldn't read).
-On insurance forms the *identical* tool, *identical* config, was the **clean #1 at 92%, reading
-checkbox state at 100%**, with fabrication down to 8%. Nothing about the model changed — only the
-document genre did.
+4 finished **6th of the 9 ranked tools on finance (11 tested) with the highest fabrication rate of
+any tool (19% of its output unsupported** — it invented chart values and even a fake flowchart on
+graphics it couldn't read). On insurance forms the *identical* tool, *identical* config, was the
+**clean #1 at 92%, reading checkbox state at 100%**, with fabrication down to 8%. Nothing about the
+model changed — only the document genre did. (The forms corpus is only 7 pages — but this is a
+wide-gap effect, a 12-point lead and a 0-vs-100 checkbox split, far above that corpus's noise
+floor.)
 
 That single fact disproves the question most extraction RFPs are built around. **There is no "best
 PDF extractor." There is only the best extractor *for a document type*, and it changes between
@@ -32,8 +35,8 @@ not a single leaderboard rank, is what you actually want to procure for.
 | | **Finance documents** (reports, decks, memos) | **Insurance forms** (applications, attestations, claims) |
 |---|---|---|
 | The bottleneck | Reading **graphics** — charts, diagrams, dense multi-column tables | **Spatial binding** — value↔field, and *which box is ticked* |
-| Who won | **Gemini 3.5 Flash** (89%); a five-way pack of vision parsers at 86% incl. **Pulse**, the cleanest (5% fabrication) | **Mistral OCR 4** (92%); GPT-5 second (80%); Pulse clean #2 (90%) |
-| Who failed | Text-layer dumpers crater (PyMuPDF 68, Tesseract 52) — they recover characters but lose chart data and table structure | Same dumpers crater harder (30–56%) — and score **0% on checkbox state**: the tick is in the text stream but detached from its option |
+| Who won | **Gemini 3.5 Flash** (89%); a four-way pack of vision parsers at 86% incl. **Pulse**, the cleanest (5% fabrication) | **Mistral OCR 4** (92%); **Pulse** clean #2 (90%); GPT-5 third (80%) |
+| Who failed | Text-layer dumpers crater (PyMuPDF 68, Tesseract 52) — they recover characters but lose chart data and table structure | The cheap non-vision tier craters harder (44–56%; LlamaParse collapses to 31%) — and the text-flattening tools score **0% on checkbox state** (the best non-vision tool reads ≤31%): the tick is in the text stream but detached from its option |
 | The trap | **Fabrication** — a model that can't read a chart may invent plausible numbers (Mistral's 19%) | **Silent misreads** — a national-ID or date-of-birth read confidently wrong; a blank box reported as ticked |
 
 Read across the two columns and the pattern is clear: **the skill that wins finance (reading
@@ -43,7 +46,7 @@ forms.
 
 ## What holds true in *both* benchmarks (the durable lessons)
 
-1. **"Character accuracy" is the wrong metric, everywhere.** PyMuPDF recovers ~100% of the characters
+1. **"Character accuracy" is the wrong metric, everywhere.** PyMuPDF recovers 97% of the characters
    and still lost 16 points in finance and collapsed on forms, because a value detached from its row,
    or a tick detached from its option, is not usable data. Insist on **structure-aware evaluation** —
    bindings, not bytes.
@@ -56,9 +59,10 @@ forms.
    misread PII and false checkbox ticks. Neither announces itself; both flow straight into pricing,
    adjudication, or underwriting. This — not raw accuracy — is the governance risk to design against.
 
-4. **The model is a cheap, swappable commodity.** Both full benchmarks cost single-digit dollars to
-   run; in finance the value-frontier tool (Gemini 3.1 Flash-Lite) hit 86% for **$1.12**. Whatever
-   leads today will be overtaken within a year. Model choice is your *least* durable decision.
+4. **The model is a cheap, swappable commodity.** A full 599-page extraction pass costs single-digit
+   dollars on the value tier — Gemini 3.1 Flash-Lite hit 86% for **$1.12** — and the entire forms
+   benchmark ran for a few dollars. Whatever leads today will be overtaken within a year. Model
+   choice is your *least* durable decision.
 
 ## What to actually do
 

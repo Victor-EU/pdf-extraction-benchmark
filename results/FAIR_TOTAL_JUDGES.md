@@ -18,6 +18,7 @@ run — `VEND_CAP = GT_CAP = 16000`; see `AUDIT_VEND_CAP.md`.)*
 | **LlamaParse** (agentic) | **89.6%** | **95.9%** | +6.3 |
 | Gemini 3.1 Flash-Lite | 89.9% | 95.3% | +5.4 |
 | Landing AI | 89.1% | 95.5% | +6.4 |
+| **Pulse (Ultra 2)** (added 2026-06-30) | **89.9%** | **92.4%** | +2.5 |
 | **Mistral OCR 4** (added 2026-06-23) | **84.1%** | **92.8%** | +8.7 |
 | PyMuPDF | 84.2% | 83.7% | −0.5 |
 | LiteParse | 80.3% | 79.9% | −0.4 |
@@ -34,14 +35,24 @@ run — `VEND_CAP = GT_CAP = 16000`; see `AUDIT_VEND_CAP.md`.)*
 > instance of the Gemini judge under-penalizing wrong/invented content (§ "Reading"). Use gpt-5 for the
 > fidelity number; Gemini would have rated Mistral nearly clean. See [`../MISTRAL_ADD.md`](../MISTRAL_ADD.md).
 
+> **Pulse (Ultra 2) was added 2026-06-30** (spliced runs, `_fair_total_judging*_pulse.json` /
+> `_fair_total_judging_gemini_v2*_pulse.json`, same prompt + caps + v3-key weights). Content recall:
+> **89.9 (gpt-5) / 92.4 (Gemini)** — the **smallest positive cross-family gap of any vision tool
+> (+2.5)**, the mirror image of Mistral's +8.7: with almost no invented content to over-credit
+> (lowest fabrication of any vision tool, 5% unsupported), the lenient Gemini judge has little room
+> to inflate it. On the canonical structure-aware rubric Pulse scores **86.1 (gpt-5) / 90.2
+> (Gemini)**, joining the four-vendor 86-tier under gpt-5. See [`../PULSE_ADD.md`](../PULSE_ADD.md).
+
 **Ranking (clean vendors)**
-- gpt-5 judge: **Gemini Flash > Flash-Lite ≈ LlamaParse ≈ Landing AI > Mistral ≈ PyMuPDF > LiteParse** > Tesseract
-- Gemini judge: **Gemini Flash > LlamaParse ≈ Landing AI ≈ Flash-Lite > Mistral > PyMuPDF > LiteParse** > Tesseract
+- gpt-5 judge: **Gemini Flash > Flash-Lite ≈ Pulse ≈ LlamaParse ≈ Landing AI > Mistral ≈ PyMuPDF > LiteParse** > Tesseract
+- Gemini judge: **Gemini Flash > LlamaParse ≈ Landing AI ≈ Flash-Lite > Mistral ≈ Pulse > PyMuPDF > LiteParse** > Tesseract
 
 **Reading.** The Gemini judge is a more lenient grader (absolute scores +5–13pp, with Tesseract's OCR text
 treated most generously), so absolute numbers are not comparable across judges — but **Gemini 3.5 Flash is
 #1 clean under both**, and the top tier is stable. Below it, **LlamaParse-agentic, Flash-Lite and Landing AI
-form a tight 2nd–4th cluster** (within ~2.5pp under either judge), their exact order judge-dependent. Both
+form a tight 2nd-tier cluster** (within ~2.5pp under either judge), their exact order judge-dependent —
+Pulse joins that cluster under the gpt-5 judge (89.9) but sits ~3pp below it under the more lenient
+Gemini judge, whose extra credit accrues mostly to verbose/invented content Pulse doesn't emit. Both
 judges agree LlamaParse-agentic sits in this top cluster, far above the pure text-layer parsers.
 **Neither judge favours its own family**: the Gemini judge scores gpt-5-image (97.3) level with its own
 Gemini Flash (97.3), mirroring the gpt-5 judge's habit of scoring Gemini's diagrams above its own. The

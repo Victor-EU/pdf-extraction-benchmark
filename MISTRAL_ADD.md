@@ -6,6 +6,10 @@ and the figure eval. Headline: **80% structure-aware (gpt-5) — 5th among real 
 +12 over PyMuPDF — but the highest unsupported rate of any vendor (19%): its chart/figure annotation
 fabricates on graphics it can't read.***
 
+> **Update 2026-06-30:** Pulse's addition as the 11th vendor moves Mistral to **6th among real
+> vendors** (Pulse joins the 86 tier above it). The ranks in this dated add-trail are as of
+> 2026-06-23; the scores are unchanged.
+
 ## What Mistral OCR 4 is
 
 [Mistral OCR 4](https://mistral.ai/news/ocr-4/) (released 2026-06-23) is a vision document-extraction
